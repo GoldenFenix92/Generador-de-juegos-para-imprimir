@@ -12,19 +12,23 @@ export default function Home() {
 
   return (
     <div>
-      <h1 className="mb-2 text-3xl font-bold text-gray-900">Generador de Juegos Imprimibles</h1>
-      <p className="mb-8 text-gray-600">
-        Selecciona un juego, configura los parámetros y descarga tu PDF listo para imprimir.
-      </p>
+      <div className="text-center mb-10">
+        <h1 className="text-4xl font-bold mb-3" style={{ color: "var(--text-primary)" }}>
+          Generador de Juegos Imprimibles
+        </h1>
+        <p className="text-lg" style={{ color: "var(--text-muted)" }}>
+          Selecciona un juego, configura los parametros y descarga tu PDF listo para imprimir.
+        </p>
+      </div>
       <div className="grid gap-6 sm:grid-cols-2">
         {GAMES.map((game) => (
           <button
             key={game.id}
             onClick={() => navigate(`/generator/${game.id}`)}
-            className="rounded-xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:shadow-md"
+            className="glass-card glass-card-hover cursor-pointer text-left p-6"
           >
-            <h2 className="mb-1 text-xl font-semibold text-gray-900">{game.name}</h2>
-            <p className="text-sm text-gray-500">{game.description}</p>
+            <h2 className="mb-1 text-xl font-semibold text-primary">{game.name}</h2>
+            <p className="text-sm text-muted">{game.description}</p>
           </button>
         ))}
       </div>

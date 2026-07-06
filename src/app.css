@@ -1,5 +1,197 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-accent: #0D9488;
+  --color-accent-hover: #0F766E;
+  --color-accent-glow: rgba(13, 148, 136, 0.3);
+  --color-secondary: #8B5CF6;
+  --color-warm: #D97706;
+  --font-heading: "Crimson Pro", Georgia, serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+}
+
+@utility glass-card {
+  border-radius: 16px;
+  background: var(--card-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--card-border);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 8px 32px rgba(0, 0, 0, 0.06);
+}
+
+@utility glass-card-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  &:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      0 12px 48px rgba(0, 0, 0, 0.08);
+  }
+}
+
+@utility glass-btn {
+  border-radius: 20px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--btn-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--btn-border);
+  color: var(--btn-text);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  &:hover:not(:disabled) {
+    background: var(--btn-bg-hover);
+    border-color: var(--accent);
+    box-shadow: 0 4px 16px var(--accent-glow);
+    transform: translateY(-1px);
+  }
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+@utility glass-select {
+  border-radius: 12px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  background: var(--select-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--select-border);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  option {
+    background: var(--option-bg);
+    color: var(--text-primary);
+  }
+}
+
+@utility text-primary {
+  color: var(--text-primary);
+}
+
+@utility text-muted {
+  color: var(--text-muted);
+}
+
+@utility text-accent {
+  color: var(--accent);
+}
+
+@utility glow-accent {
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+
+@keyframes blob-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -20px) scale(1.05); }
+  50% { transform: translate(-20px, 15px) scale(0.95); }
+  75% { transform: translate(15px, 25px) scale(1.02); }
+}
+
+@utility blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.08;
+  pointer-events: none;
+  animation: blob-drift 20s ease-in-out infinite;
+}
+
+@utility blob-delayed {
+  animation-delay: -7s;
+}
+
+@utility blob-slow {
+  animation-duration: 25s;
+}
+
+.light {
+  --bg-base: #F1F5F9;
+  --bg-elevated: #FFFFFF;
+  --bg-gradient: linear-gradient(145deg, #F8FAFC 0%, #EFF6FF 40%, #F0FDF4 100%);
+  --card-bg: rgba(255, 255, 255, 0.65);
+  --card-border: rgba(255, 255, 255, 0.5);
+  --btn-bg: rgba(13, 148, 136, 0.12);
+  --btn-bg-hover: rgba(13, 148, 136, 0.2);
+  --btn-border: rgba(13, 148, 136, 0.2);
+  --btn-text: #0F766E;
+  --select-bg: rgba(255, 255, 255, 0.65);
+  --select-border: rgba(148, 163, 184, 0.5);
+  --option-bg: #F8FAFC;
+  --text-primary: #1E293B;
+  --text-muted: #64748B;
+  --accent: #0D9488;
+  --accent-hover: #0F766E;
+  --accent-glow: rgba(13, 148, 136, 0.15);
+  --blob-1: #2DD4BF;
+  --blob-2: #A78BFA;
+  --blob-3: #FDE047;
+  color-scheme: light;
+}
+
+.dark {
+  --bg-base: #0F172A;
+  --bg-elevated: #1E293B;
+  --bg-gradient: linear-gradient(145deg, #0F172A 0%, #111827 50%, #1A2035 100%);
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --card-border: rgba(255, 255, 255, 0.12);
+  --btn-bg: rgba(13, 148, 136, 0.15);
+  --btn-bg-hover: rgba(13, 148, 136, 0.25);
+  --btn-border: rgba(13, 148, 136, 0.2);
+  --btn-text: #5EEAD4;
+  --select-bg: rgba(255, 255, 255, 0.05);
+  --select-border: rgba(255, 255, 255, 0.15);
+  --option-bg: #1E293B;
+  --text-primary: #F1F5F9;
+  --text-muted: #94A3B8;
+  --accent: #14B8A6;
+  --accent-hover: #2DD4BF;
+  --accent-glow: rgba(20, 184, 166, 0.2);
+  --blob-1: #0D9488;
+  --blob-2: #7C3AED;
+  --blob-3: #D97706;
+  color-scheme: dark;
+}
+
+html {
+  font-family: var(--font-body);
+}
+
+body {
+  background: var(--bg-gradient);
+  color: var(--text-primary);
+  min-height: 100vh;
+  transition: background 0.4s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+::selection {
+  background: var(--accent-glow);
+  color: var(--text-primary);
+}
+
 @media print {
   header, footer, nav, .no-print {
     display: none !important;

@@ -32,6 +32,19 @@ function getLineCells(
   return cells;
 }
 
+const cellStyle = {
+  display: "flex",
+  alignItems: "center" as const,
+  justifyContent: "center" as const,
+  width: "36px",
+  height: "36px",
+  fontFamily: "var(--font-body)",
+  fontSize: "0.875rem",
+  fontWeight: 700,
+  borderRadius: "4px",
+  transition: "all 0.15s ease",
+};
+
 function OnlineGrid({ data }: { data: WordSearchOutput }) {
   const { grid, words } = data;
   const [found, setFound] = useState<Set<string>>(new Set());
@@ -53,7 +66,7 @@ function OnlineGrid({ data }: { data: WordSearchOutput }) {
   const startRef = useRef<[number, number] | null>(null);
   const endRef = useRef<[number, number] | null>(null);
   const foundRef = useRef(found);
-  foundRef.current = found;
+  useEffect(() => { foundRef.current = found; }, [found]);
 
   const handleMouseDown = useCallback((row: number, col: number) => {
     selecting.current = true;
@@ -105,47 +118,57 @@ function OnlineGrid({ data }: { data: WordSearchOutput }) {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div
-        className="grid gap-px bg-gray-300 select-none"
-        style={{ gridTemplateColumns: `repeat(${grid[0].length}, 36px)` }}
-      >
-        {grid.map((row, r) =>
-          row.map((cell, c) => {
-            const key = `${r},${c}`;
-            const isFound = foundCellKeys.has(key);
-            const isHighlighted = highlighted.has(key);
+      <div className="glass-card !p-2" style={{ display: "inline-block" }}>
+        <div
+          className="grid gap-1"
+          style={{ gridTemplateColumns: `repeat(${grid[0].length}, 36px)` }}
+        >
+          {grid.map((row, r) =>
+            row.map((cell, c) => {
+              const key = `${r},${c}`;
+              const isFound = foundCellKeys.has(key);
+              const isHighlighted = highlighted.has(key);
 
-            return (
-              <button
-                key={key}
-                type="button"
-                onMouseDown={() => handleMouseDown(r, c)}
-                onMouseEnter={() => handleMouseEnter(r, c)}
-                className={`flex h-9 w-9 items-center justify-center text-sm font-mono font-bold transition ${
-                  isFound
-                    ? "bg-green-300 text-green-900"
-                    : isHighlighted
-                      ? "bg-yellow-300 text-gray-900"
-                      : "bg-white text-gray-900 hover:bg-gray-100"
-                }`}
-              >
-                {cell}
-              </button>
-            );
-          }),
-        )}
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onMouseDown={() => handleMouseDown(r, c)}
+                  onMouseEnter={() => handleMouseEnter(r, c)}
+                  style={{
+                    ...cellStyle,
+                    backgroundColor: isFound
+                      ? "rgba(16, 185, 129, 0.3)"
+                      : isHighlighted
+                        ? "rgba(250, 204, 21, 0.4)"
+                        : "var(--card-bg)",
+                    color: isFound
+                      ? "var(--text-primary)"
+                      : isHighlighted
+                        ? "var(--text-primary)"
+                        : "var(--text-muted)",
+                    cursor: "pointer",
+                  }}
+                  className="hover:brightness-110"
+                >
+                  {cell}
+                </button>
+              );
+            }),
+          )}
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 justify-center">
         {words.map((word) => {
           const wFound = found.has(word);
           return (
             <span
               key={word}
-              className={`rounded-md px-3 py-1 text-sm font-medium transition ${
+              className={`rounded-lg px-3 py-1 text-sm font-medium transition-all ${
                 wFound
-                  ? "bg-green-200 text-green-800 line-through"
-                  : "bg-gray-100 text-gray-700"
+                  ? "bg-emerald-500/20 text-emerald-500 line-through"
+                  : "glass-card !px-3 !py-1 text-muted"
               }`}
             >
               {word}
@@ -155,7 +178,9 @@ function OnlineGrid({ data }: { data: WordSearchOutput }) {
       </div>
 
       {found.size === words.length && (
-        <p className="text-lg font-bold text-green-600">¡Encontraste todas las palabras!</p>
+        <p className="text-lg font-bold" style={{ color: "var(--accent)" }}>
+          Encontraste todas las palabras!
+        </p>
       )}
     </div>
   );
@@ -185,29 +210,37 @@ function PreviewGrid({ data }: { data: WordSearchOutput }) {
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div
-        className="grid gap-px bg-gray-300"
-        style={{ gridTemplateColumns: `repeat(${grid[0].length}, 36px)` }}
-      >
-        {grid.map((row, r) =>
-          row.map((cell, c) => (
-            <div
-              key={`${r}-${c}`}
-              className={`flex h-9 w-9 items-center justify-center text-sm font-mono font-bold ${
-                isWordCell(r, c) ? "bg-yellow-200 text-gray-900" : "bg-white text-gray-400"
-              }`}
-            >
-              {cell}
-            </div>
-          )),
-        )}
+      <div className="glass-card !p-2" style={{ display: "inline-block" }}>
+        <div
+          className="grid gap-1"
+          style={{ gridTemplateColumns: `repeat(${grid[0].length}, 36px)` }}
+        >
+          {grid.map((row, r) =>
+            row.map((cell, c) => (
+              <div
+                key={`${r}-${c}`}
+                style={{
+                  ...cellStyle,
+                  backgroundColor: isWordCell(r, c)
+                    ? "rgba(250, 204, 21, 0.35)"
+                    : "var(--card-bg)",
+                  color: isWordCell(r, c)
+                    ? "var(--text-primary)"
+                    : "var(--text-muted)",
+                }}
+              >
+                {cell}
+              </div>
+            )),
+          )}
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 justify-center">
         {words.map((word) => (
           <span
             key={word}
-            className="rounded-md bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-800"
+            className="glass-card !px-3 !py-1 text-sm font-medium text-muted"
           >
             {word}
           </span>
@@ -221,27 +254,33 @@ function PrintGrid({ data }: { data: WordSearchOutput }) {
   const { grid, words } = data;
   return (
     <div className="flex flex-col items-center gap-6">
-      <div
-        className="grid gap-px bg-gray-300"
-        style={{ gridTemplateColumns: `repeat(${grid[0].length}, 36px)` }}
-      >
-        {grid.map((row, r) =>
-          row.map((cell, c) => (
-            <div
-              key={`${r}-${c}`}
-              className="flex h-9 w-9 items-center justify-center bg-white text-sm font-mono font-bold text-gray-900"
-            >
-              {cell}
-            </div>
-          )),
-        )}
+      <div className="glass-card !p-2" style={{ display: "inline-block" }}>
+        <div
+          className="grid gap-1"
+          style={{ gridTemplateColumns: `repeat(${grid[0].length}, 36px)` }}
+        >
+          {grid.map((row, r) =>
+            row.map((cell, c) => (
+              <div
+                key={`${r}-${c}`}
+                style={{
+                  ...cellStyle,
+                  backgroundColor: "var(--card-bg)",
+                  color: "var(--text-primary)",
+                }}
+              >
+                {cell}
+              </div>
+            )),
+          )}
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 justify-center">
         {words.map((word) => (
           <span
             key={word}
-            className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700"
+            className="glass-card !px-3 !py-1 text-sm font-medium text-muted"
           >
             {word}
           </span>

@@ -54,23 +54,23 @@ export default function PrintPreview() {
   if (!definition) {
     return (
       <div>
-        <Link to="/" className="mb-4 inline-block text-sm text-blue-600 hover:underline">
+        <Link to="/" className="mb-4 inline-block text-sm hover:underline text-accent">
           &larr; Volver
         </Link>
-        <h1 className="mb-6 text-2xl font-bold text-gray-900">Juego no encontrado</h1>
-        <p className="text-gray-600">El juego solicitado no está disponible.</p>
+        <h1 className="mb-6 text-2xl font-bold text-primary">Juego no encontrado</h1>
+        <p className="text-muted">El juego solicitado no esta disponible.</p>
       </div>
     );
   }
 
   return (
     <div>
-      <Link to={`/generator/${gameId}`} className="mb-4 inline-block text-sm text-blue-600 hover:underline">
+      <Link to={`/generator/${gameId}`} className="mb-4 inline-block text-sm hover:underline text-accent">
         &larr; Volver
       </Link>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Vista previa - {label}</h1>
+      <h1 className="mb-6 text-2xl font-bold text-primary">Vista previa - {label}</h1>
 
-      <div className="mb-6 flex gap-3">
+      <div className="glass-card mb-6 p-4 flex gap-3 w-fit">
         <Button onClick={handleDownload} disabled={!PDFComponent}>Descargar PDF</Button>
         <Button onClick={handlePrint} disabled={!PDFComponent}>Imprimir</Button>
       </div>

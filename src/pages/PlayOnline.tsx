@@ -27,21 +27,21 @@ export default function PlayOnline() {
   if (!definition || !config || !data) {
     return (
       <div>
-        <Link to="/" className="mb-4 inline-block text-sm text-blue-600 hover:underline">
+        <Link to="/" className="mb-4 inline-block text-sm hover:underline text-accent">
           &larr; Volver
         </Link>
-        <h1 className="mb-6 text-2xl font-bold text-gray-900">Juego no encontrado</h1>
-        <p className="text-gray-600">El juego solicitado no está disponible.</p>
+        <h1 className="mb-6 text-2xl font-bold text-primary">Juego no encontrado</h1>
+        <p className="text-muted">El juego solicitado no esta disponible.</p>
       </div>
     );
   }
 
   return (
     <div>
-      <Link to={`/generator/${gameId}`} className="mb-4 inline-block text-sm text-blue-600 hover:underline">
+      <Link to={`/generator/${gameId}`} className="mb-4 inline-block text-sm hover:underline text-accent">
         &larr; Volver
       </Link>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">{label} — Jugar online</h1>
+      <h1 className="mb-6 text-2xl font-bold text-primary">{label} — Jugar online</h1>
 
       <definition.Preview data={data as any} config={{ ...config, showSolution: false } as any} />
     </div>
