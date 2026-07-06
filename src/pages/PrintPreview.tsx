@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getGameDefinition, getPDFComponent } from "../lib/gameRegistry";
 import type { GameId } from "../lib/gameRegistry";
@@ -19,7 +19,7 @@ export default function PrintPreview() {
   const gameId = gameParam as GameId;
   const definition = getGameDefinition(gameId);
   const label = GAME_LABELS[gameId] ?? "Juego";
-  const storedConfig = useGeneratorStore((s) => s.configs[gameId]);
+  const stored = useGeneratorStore((s) => s.data[gameId]);
 
   const [PDFComponent, setPDFComponent] = useState<React.FC<any> | null>(null);
 
@@ -27,12 +27,8 @@ export default function PrintPreview() {
     getPDFComponent(gameId).then((mod) => setPDFComponent(() => mod.default));
   }, [gameId]);
 
-  const config = storedConfig ?? definition?.defaultConfig;
-  const data = useMemo(() => {
-    if (!definition || !config) return null;
-    return definition.generate(config);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [definition, JSON.stringify(config)]);
+  const data = stored?.output ?? null;
+  const config = stored?.config ?? definition?.defaultConfig;
 
   function buildDoc() {
     if (!data || !config || !PDFComponent) return null;

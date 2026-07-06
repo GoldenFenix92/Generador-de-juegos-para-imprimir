@@ -7,7 +7,8 @@ import { Select } from "../components/ui/Select";
 import { DifficultySelector } from "../components/ui/DifficultySelector";
 import { useGeneratorStore } from "../store/generator";
 import type { GameConfig } from "../types/games";
-import type { WordSearchMode } from "../components/games/wordsearch/types";
+import type { WordSearchMode, GenerationMode, ThemeId } from "../components/games/wordsearch/types";
+import { THEMES } from "../components/games/wordsearch/types";
 
 const GAME_LABELS: Record<string, string> = {
   wordsearch: "Sopa de Letras",
@@ -18,17 +19,83 @@ const GAME_LABELS: Record<string, string> = {
 
 const WORD_COUNT_OPTIONS = [5, 10, 15, 20];
 
+interface WSConfig extends GameConfig {
+  wordCount: number;
+  mode: WordSearchMode;
+  generationMode: GenerationMode;
+  theme?: ThemeId;
+  customWords?: string[];
+}
+
 function WordSearchOptions({
   wordCount,
   mode,
+  generationMode,
+  theme,
+  customWords,
   onChange,
 }: {
   wordCount: number;
   mode: WordSearchMode;
-  onChange: (patch: Partial<GameConfig & { wordCount: number; mode: WordSearchMode }>) => void;
+  generationMode: GenerationMode;
+  theme?: ThemeId;
+  customWords?: string[];
+  onChange: (patch: Partial<WSConfig>) => void;
 }) {
+  const [customText, setCustomText] = useState(customWords?.join(", ") ?? "");
+
+  function handleCustomBlur() {
+    const words = customText
+      .split(/[,;\n]+/)
+      .map((w) => w.trim())
+      .filter((w) => w.length > 0);
+    onChange({ customWords: words });
+  }
+
   return (
     <>
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">Modo de generación</label>
+        <Select
+          value={generationMode}
+          onChange={(e) => onChange({ generationMode: e.target.value as GenerationMode })}
+        >
+          <option value="random">Aleatorio</option>
+          <option value="themed">Temático</option>
+          <option value="custom">Personalizado</option>
+        </Select>
+      </div>
+
+      {generationMode === "themed" && (
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Temática</label>
+          <Select
+            value={theme ?? THEMES[0].id}
+            onChange={(e) => onChange({ theme: e.target.value as ThemeId })}
+          >
+            {THEMES.map((t) => (
+              <option key={t.id} value={t.id}>{t.label}</option>
+            ))}
+          </Select>
+        </div>
+      )}
+
+      {generationMode === "custom" && (
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Palabras personalizadas (5-20, separadas por comas)
+          </label>
+          <textarea
+            value={customText}
+            onChange={(e) => setCustomText(e.target.value)}
+            onBlur={handleCustomBlur}
+            rows={3}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+            placeholder="ej: PERRO, GATO, CASA, SOL, LUNA"
+          />
+        </div>
+      )}
+
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-700">Cantidad de palabras</label>
         <Select
@@ -63,32 +130,40 @@ export default function Generator() {
   const gameId = gameParam as GameId;
   const definition = getGameDefinition(gameId);
   const label = GAME_LABELS[gameId] ?? "Juego";
-  const savedConfig = useGeneratorStore((s) => s.configs[gameId]);
-  const setCurrentConfig = useGeneratorStore((s) => s.setCurrentConfig);
+
+  const stored = useGeneratorStore((s) => s.data[gameId]);
+  const setGeneratedData = useGeneratorStore((s) => s.setGeneratedData);
+  const clearGeneratedData = useGeneratorStore((s) => s.clearGeneratedData);
 
   const [config, setConfig] = useState<any>(
-    savedConfig ?? definition?.defaultConfig ?? { size: 8, difficulty: "easy" },
+    stored?.config ?? definition?.defaultConfig ?? { size: 8, difficulty: "easy" },
   );
 
-  useEffect(() => {
-    setCurrentConfig(gameId, config);
-  }, [gameId, config, setCurrentConfig]);
+  const storedConfigOK = stored && JSON.stringify(stored.config) === JSON.stringify(config);
 
   const data = useMemo(() => {
     if (!definition) return null;
+    if (storedConfigOK) return stored.output;
     return definition.generate(config);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [definition, JSON.stringify(config)]);
+  }, [definition, storedConfigOK, JSON.stringify(config)]);
+
+  useEffect(() => {
+    if (data && definition && !storedConfigOK) {
+      setGeneratedData(gameId, config, data);
+    }
+  }, [gameId, data, config, definition, setGeneratedData, storedConfigOK]);
 
   function patch(p: Record<string, unknown>) {
     setConfig((c: any) => ({ ...c, ...p }));
   }
 
   function regenerate() {
-    setConfig((c: any) => ({ ...c }));
+    clearGeneratedData(gameId);
   }
 
   const isWordSearch = gameId === "wordsearch";
+  const previewConfig = isWordSearch ? { ...config, showSolution: true } : config;
 
   if (!definition) {
     return (
@@ -119,11 +194,14 @@ export default function Generator() {
           <WordSearchOptions
             wordCount={config.wordCount ?? 10}
             mode={config.mode ?? "print"}
+            generationMode={config.generationMode ?? "random"}
+            theme={config.theme}
+            customWords={config.customWords}
             onChange={patch}
           />
         )}
 
-        <Button onClick={regenerate}>Generar nuevo</Button>
+        <Button onClick={regenerate}>Generar nueva Sopa de Letras</Button>
 
         {isWordSearch && config.mode === "online" ? (
           <span className="rounded-lg bg-green-100 px-4 py-2 text-sm font-medium text-green-800">
@@ -135,8 +213,7 @@ export default function Generator() {
       </div>
 
       {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        data && <definition.Preview data={data as any} config={config as any} />
+        data && <definition.Preview data={data as any} config={previewConfig as any} />
       }
     </div>
   );

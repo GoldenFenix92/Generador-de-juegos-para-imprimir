@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { generateWordSearch } from "./generate";
+import { THEME_POOLS } from "./themes";
 
-const BASE_CONFIG = { wordCount: 10 as const, mode: "print" as const };
+const BASE_CONFIG = { wordCount: 10 as const, mode: "print" as const, generationMode: "random" as const };
 
 describe("generateWordSearch", () => {
   it("generates a grid sized for the word count", () => {
@@ -20,7 +21,7 @@ describe("generateWordSearch", () => {
   });
 
   it("places the requested number of words", () => {
-    const result = generateWordSearch({ size: 14, difficulty: "easy", wordCount: 5, mode: "print" });
+    const result = generateWordSearch({ size: 14, difficulty: "easy", wordCount: 5, mode: "print", generationMode: "random" });
     expect(result.words.length).toBe(5);
   });
 
@@ -34,7 +35,38 @@ describe("generateWordSearch", () => {
   });
 
   it("expert difficulty uses reverse directions", () => {
-    const result = generateWordSearch({ size: 22, difficulty: "expert", wordCount: 10, mode: "print" });
+    const result = generateWordSearch({ size: 22, difficulty: "expert", wordCount: 10, mode: "print", generationMode: "random" });
     expect(result.words.length).toBe(10);
+  });
+
+  it("themed mode selects words from the theme pool", () => {
+    const result = generateWordSearch({
+      size: 10, difficulty: "easy", wordCount: 5, mode: "print",
+      generationMode: "themed", theme: "animales",
+    });
+    const pool = THEME_POOLS["animales"].map((w) => w.toUpperCase().replace(/[^A-Z]/g, ""));
+    for (const word of result.words) {
+      expect(pool).toContain(word);
+    }
+  });
+
+  it("custom mode uses provided words", () => {
+    const result = generateWordSearch({
+      size: 10, difficulty: "easy", wordCount: 5, mode: "print",
+      generationMode: "custom", customWords: ["PERRO", "GATO", "SOL", "LUNA", "MAR"],
+    });
+    expect(result.words).toContain("PERRO");
+    expect(result.words).toContain("GATO");
+    expect(result.words).toContain("SOL");
+    expect(result.words).toContain("LUNA");
+    expect(result.words).toContain("MAR");
+  });
+
+  it("custom mode falls back to random if no words given", () => {
+    const result = generateWordSearch({
+      size: 10, difficulty: "easy", wordCount: 5, mode: "print",
+      generationMode: "custom", customWords: [],
+    });
+    expect(result.words.length).toBe(5);
   });
 });

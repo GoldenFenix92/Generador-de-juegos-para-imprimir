@@ -5,7 +5,10 @@ import type { WordSearchConfig, WordSearchOutput } from "./types";
 const wordSearchGame: GameDefinition<WordSearchOutput, WordSearchConfig> = {
   generate: generateWordSearch,
   Preview: WordSearch,
-  defaultConfig: { size: 10, difficulty: "easy", wordCount: 10, mode: "print" },
+  defaultConfig: {
+    size: 10, difficulty: "easy", wordCount: 10, mode: "print",
+    generationMode: "random",
+  },
 };
 
 export default wordSearchGame;

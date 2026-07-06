@@ -1,5 +1,6 @@
 import { shuffle, createGrid } from "../../../lib/algorithms";
 import type { WordSearchConfig, WordSearchOutput } from "./types";
+import { THEME_POOLS } from "./themes";
 
 const WORD_POOLS: Record<string, string[]> = {
   easy: [
@@ -98,13 +99,34 @@ function getGridSize(wordCount: number): number {
   return 22;
 }
 
+function selectWords(config: WordSearchConfig): string[] {
+  const count = config.wordCount ?? 10;
+
+  if (config.generationMode === "themed" && config.theme && THEME_POOLS[config.theme]) {
+    const pool = shuffle([...THEME_POOLS[config.theme]]);
+    return pool.slice(0, Math.min(count, pool.length));
+  }
+
+  if (config.generationMode === "custom" && config.customWords && config.customWords.length > 0) {
+    const valid = config.customWords
+      .filter((w) => w.trim().length >= 2)
+      .map((w) => w.trim().toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ]/g, ""))
+      .filter((w) => w.length >= 2);
+    if (valid.length === 0) {
+      return shuffle([...WORD_POOLS.medium]).slice(0, count);
+    }
+    return shuffle([...new Set(valid)]).slice(0, count);
+  }
+
+  const pool = shuffle([...WORD_POOLS[config.difficulty] ?? WORD_POOLS.medium]);
+  return pool.slice(0, count);
+}
+
 export function generateWordSearch(config: WordSearchConfig): WordSearchOutput {
   const size = getGridSize(config.wordCount);
   const grid = createGrid(size, size, "");
-  const pool = [...WORD_POOLS[config.difficulty] ?? WORD_POOLS.medium];
-  const selectedWords = shuffle(pool).slice(0, config.wordCount ?? 10);
+  const selectedWords = selectWords(config);
 
-  // For hard and expert, include reverse directions
   const allDirections =
     config.difficulty === "hard" || config.difficulty === "expert"
       ? [...DIRECTIONS, ...REVERSE_DIRECTIONS]
