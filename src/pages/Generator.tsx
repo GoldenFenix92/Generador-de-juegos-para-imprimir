@@ -134,6 +134,7 @@ export default function Generator() {
   const storedData = useGeneratorStore((s) => s.data[gameId]);
   const setCurrentConfig = useGeneratorStore((s) => s.setCurrentConfig);
   const setGeneratedData = useGeneratorStore((s) => s.setGeneratedData);
+  const clearGeneratedData = useGeneratorStore((s) => s.clearGeneratedData);
 
   const [config, setConfig] = useState<any>(
     storedData?.config ?? definition?.defaultConfig ?? { size: 8, difficulty: "easy" },
@@ -156,6 +157,11 @@ export default function Generator() {
     const newData = definition.generate(config);
     setData(newData);
     setGeneratedData(gameId, config, newData);
+  }
+
+  function clearData() {
+    setData(null);
+    clearGeneratedData(gameId);
   }
 
   const isWordSearch = gameId === "wordsearch";
@@ -211,25 +217,25 @@ export default function Generator() {
                 <tbody className="text-gray-700">
                   <tr className="border-b border-gray-100">
                     <td className="px-2 py-1 font-medium">Facil</td>
-                    <td className="px-2 py-1">2 (→ ↓)</td>
+                    <td className="px-2 py-1">2 (derecha, abajo)</td>
                     <td className="px-2 py-1">Cortas (3-5 letras)</td>
                     <td className="px-2 py-1">No</td>
                   </tr>
                   <tr className="border-b border-gray-100">
                     <td className="px-2 py-1 font-medium">Medio</td>
-                    <td className="px-2 py-1">3 (→ ↓ ↘)</td>
+                    <td className="px-2 py-1">3 (derecha, abajo, diagonal)</td>
                     <td className="px-2 py-1">Cortas y medias (3-8 letras)</td>
                     <td className="px-2 py-1">No</td>
                   </tr>
                   <tr className="border-b border-gray-100">
                     <td className="px-2 py-1 font-medium">Dificil</td>
-                    <td className="px-2 py-1">6 (→← ↓↑ ↘↗)</td>
+                    <td className="px-2 py-1">6 (las 3 anteriores + reversas)</td>
                     <td className="px-2 py-1">Cortas a largas</td>
                     <td className="px-2 py-1">Si</td>
                   </tr>
                   <tr>
                     <td className="px-2 py-1 font-medium">Experto</td>
-                    <td className="px-2 py-1">8 (todas)</td>
+                    <td className="px-2 py-1">8 (todas las direcciones)</td>
                     <td className="px-2 py-1">Cortas a largas</td>
                     <td className="px-2 py-1">Si + concatenadas</td>
                   </tr>
@@ -256,6 +262,8 @@ export default function Generator() {
             onChange={patch}
           />
         )}
+
+        {data && <Button onClick={clearData}>Limpiar</Button>}
 
         <Button onClick={regenerate}>Generar nueva Sopa de Letras</Button>
 
