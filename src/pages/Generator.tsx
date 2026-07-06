@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { getGameDefinition } from "../lib/gameRegistry";
 import type { GameId } from "../lib/gameRegistry";
@@ -131,35 +131,46 @@ export default function Generator() {
   const definition = getGameDefinition(gameId);
   const label = GAME_LABELS[gameId] ?? "Juego";
 
-  const stored = useGeneratorStore((s) => s.data[gameId]);
+  const storedData = useGeneratorStore((s) => s.data[gameId]);
+  const setCurrentConfig = useGeneratorStore((s) => s.setCurrentConfig);
   const setGeneratedData = useGeneratorStore((s) => s.setGeneratedData);
-  const clearGeneratedData = useGeneratorStore((s) => s.clearGeneratedData);
 
   const [config, setConfig] = useState<any>(
-    stored?.config ?? definition?.defaultConfig ?? { size: 8, difficulty: "easy" },
+    storedData?.config ?? definition?.defaultConfig ?? { size: 8, difficulty: "easy" },
   );
 
-  const storedConfigOK = stored && JSON.stringify(stored.config) === JSON.stringify(config);
+  const configsMatch = storedData && JSON.stringify(storedData.config) === JSON.stringify(config);
+  const [data, setData] = useState<any>(configsMatch ? storedData.output : null);
 
-  const data = useMemo(() => {
-    if (!definition) return null;
-    if (storedConfigOK) return stored.output;
-    return definition.generate(config);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [definition, storedConfigOK, JSON.stringify(config)]);
+  const hasGenerated = useRef(false);
 
   useEffect(() => {
-    if (data && definition && !storedConfigOK) {
-      setGeneratedData(gameId, config, data);
+    if (hasGenerated.current) return;
+    if (!definition) return;
+    hasGenerated.current = true;
+    setCurrentConfig(gameId, config);
+
+    if (!data) {
+      const newData = definition.generate(config);
+      setData(newData);
+      setGeneratedData(gameId, config, newData);
     }
-  }, [gameId, data, config, definition, setGeneratedData, storedConfigOK]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function patch(p: Record<string, unknown>) {
-    setConfig((c: any) => ({ ...c, ...p }));
+    setConfig((prev: any) => {
+      const next = { ...prev, ...p };
+      setCurrentConfig(gameId, next);
+      return next;
+    });
   }
 
   function regenerate() {
-    clearGeneratedData(gameId);
+    if (!definition) return;
+    const newData = definition.generate(config);
+    setData(newData);
+    setGeneratedData(gameId, config, newData);
   }
 
   const isWordSearch = gameId === "wordsearch";
@@ -204,9 +215,7 @@ export default function Generator() {
         <Button onClick={regenerate}>Generar nueva Sopa de Letras</Button>
 
         {isWordSearch && config.mode === "online" ? (
-          <span className="rounded-lg bg-green-100 px-4 py-2 text-sm font-medium text-green-800">
-            Modo online activo
-          </span>
+          <Button onClick={() => navigate(`/play/${gameId}`)}>Jugar online</Button>
         ) : (
           <Button onClick={() => navigate(`/print/${gameId}`)}>Ver para imprimir</Button>
         )}
