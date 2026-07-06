@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { generateWordSearch } from "./generate";
-import { THEME_POOLS } from "./themes";
+import { WORD_BANK } from "../../../data/wordbank";
 
 const BASE_CONFIG = { wordCount: 10 as const, mode: "print" as const, generationMode: "random" as const };
 
@@ -44,7 +44,7 @@ describe("generateWordSearch", () => {
       size: 10, difficulty: "easy", wordCount: 5, mode: "print",
       generationMode: "themed", theme: "animales",
     });
-    const pool = THEME_POOLS["animales"].map((w) => w.toUpperCase().replace(/[^A-Z]/g, ""));
+    const pool = WORD_BANK["animales"].map((w) => w.toUpperCase().replace(/[^A-Z]/g, ""));
     for (const word of result.words) {
       expect(pool).toContain(word);
     }

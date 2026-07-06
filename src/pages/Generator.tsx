@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { getGameDefinition } from "../lib/gameRegistry";
 import type { GameId } from "../lib/gameRegistry";
@@ -142,22 +142,6 @@ export default function Generator() {
   const configsMatch = storedData && JSON.stringify(storedData.config) === JSON.stringify(config);
   const [data, setData] = useState<any>(configsMatch ? storedData.output : null);
 
-  const hasGenerated = useRef(false);
-
-  useEffect(() => {
-    if (hasGenerated.current) return;
-    if (!definition) return;
-    hasGenerated.current = true;
-    setCurrentConfig(gameId, config);
-
-    if (!data) {
-      const newData = definition.generate(config);
-      setData(newData);
-      setGeneratedData(gameId, config, newData);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   function patch(p: Record<string, unknown>) {
     setConfig((prev: any) => {
       const next = { ...prev, ...p };
@@ -168,6 +152,7 @@ export default function Generator() {
 
   function regenerate() {
     if (!definition) return;
+    setCurrentConfig(gameId, config);
     const newData = definition.generate(config);
     setData(newData);
     setGeneratedData(gameId, config, newData);
@@ -194,6 +179,66 @@ export default function Generator() {
         &larr; Volver
       </Link>
       <h1 className="mb-6 text-2xl font-bold text-gray-900">{label}</h1>
+
+      {isWordSearch && (
+        <>
+          <div className="mb-4 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-800">
+            <p className="mb-1 font-medium">Instrucciones:</p>
+            <ol className="list-inside list-decimal space-y-1">
+              <li>Selecciona las opciones de generacion (dificultad, modo, palabras, etc.).</li>
+              <li>Haz clic en <strong>"Generar nueva Sopa de Letras"</strong> para crear el puzzle.</li>
+              <li>
+                Elige <strong>"Ver para imprimir"</strong> para descargar en PDF o imprimir, o selecciona el modo
+                "Jugar online" y presiona el boton para jugar en pantalla.
+              </li>
+            </ol>
+          </div>
+
+          <details className="mb-4 rounded-lg border border-gray-200 px-4 py-3">
+            <summary className="cursor-pointer text-sm font-medium text-gray-700">
+              Caracteristicas de cada dificultad
+            </summary>
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 text-gray-500">
+                    <th className="px-2 py-1 font-medium">Dificultad</th>
+                    <th className="px-2 py-1 font-medium">Direcciones</th>
+                    <th className="px-2 py-1 font-medium">Palabras</th>
+                    <th className="px-2 py-1 font-medium">Intersecciones</th>
+                  </tr>
+                </thead>
+                <tbody className="text-gray-700">
+                  <tr className="border-b border-gray-100">
+                    <td className="px-2 py-1 font-medium">Facil</td>
+                    <td className="px-2 py-1">2 (→ ↓)</td>
+                    <td className="px-2 py-1">Cortas (3-5 letras)</td>
+                    <td className="px-2 py-1">No</td>
+                  </tr>
+                  <tr className="border-b border-gray-100">
+                    <td className="px-2 py-1 font-medium">Medio</td>
+                    <td className="px-2 py-1">3 (→ ↓ ↘)</td>
+                    <td className="px-2 py-1">Cortas y medias (3-8 letras)</td>
+                    <td className="px-2 py-1">No</td>
+                  </tr>
+                  <tr className="border-b border-gray-100">
+                    <td className="px-2 py-1 font-medium">Dificil</td>
+                    <td className="px-2 py-1">6 (→← ↓↑ ↘↗)</td>
+                    <td className="px-2 py-1">Cortas a largas</td>
+                    <td className="px-2 py-1">Si</td>
+                  </tr>
+                  <tr>
+                    <td className="px-2 py-1 font-medium">Experto</td>
+                    <td className="px-2 py-1">8 (todas)</td>
+                    <td className="px-2 py-1">Cortas a largas</td>
+                    <td className="px-2 py-1">Si + concatenadas</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </>
+      )}
 
       <div className="mb-6 flex flex-wrap items-end gap-4">
         <DifficultySelector

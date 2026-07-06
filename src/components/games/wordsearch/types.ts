@@ -12,7 +12,7 @@ export const THEMES = [
   { id: "comida", label: "Comida" },
   { id: "deportes", label: "Deportes" },
   { id: "profesiones", label: "Profesiones" },
-  { id: "musica", label: "Música" },
+  { id: "musica", label: "Musica" },
   { id: "viajes", label: "Viajes" },
   { id: "casa", label: "Casa" },
   { id: "ropa", label: "Ropa" },

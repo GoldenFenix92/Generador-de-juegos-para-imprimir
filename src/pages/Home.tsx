@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 
 const GAMES = [
-  { id: "wordsearch", name: "Sopa de Letras", description: "Encuentra palabras ocultas en una cuadrícula de letras." },
-  { id: "sudoku", name: "Sudoku", description: "Completa la cuadrícula con números del 1 al 9." },
+  { id: "wordsearch", name: "Sopa de Letras", description: "Encuentra palabras ocultas en una cuadricula de letras." },
+  { id: "sudoku", name: "Sudoku", description: "Completa la cuadricula con numeros del 1 al 9." },
   { id: "maze", name: "Laberinto", description: "Encuentra el camino desde la entrada hasta la salida." },
-  { id: "tictactoe", name: "Tres en Raya", description: "Clásico juego de tablero para dos jugadores." },
+  { id: "tictactoe", name: "Tres en Raya", description: "Clasico juego de tablero para dos jugadores." },
 ] as const;
 
 export default function Home() {
@@ -14,7 +14,7 @@ export default function Home() {
     <div>
       <h1 className="mb-2 text-3xl font-bold text-gray-900">Generador de Juegos Imprimibles</h1>
       <p className="mb-8 text-gray-600">
-        Seleccioná un juego, configurá los parámetros y descargá tu PDF listo para imprimir.
+        Selecciona un juego, configura los parámetros y descarga tu PDF listo para imprimir.
       </p>
       <div className="grid gap-6 sm:grid-cols-2">
         {GAMES.map((game) => (
