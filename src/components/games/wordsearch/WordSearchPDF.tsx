@@ -1,15 +1,5 @@
-import { View, Text, StyleSheet, Font } from "@react-pdf/renderer";
+import { View, Text, StyleSheet } from "@react-pdf/renderer";
 import type { WordSearchConfig, WordSearchOutput } from "./types";
-
-Font.register({
-  family: "Montserrat",
-  fonts: [
-    { src: "https://cdn.jsdelivr.net/gh/JulietaUla/Montserrat@master/fonts/ttf/Montserrat-Regular.ttf", fontWeight: 400 },
-    { src: "https://cdn.jsdelivr.net/gh/JulietaUla/Montserrat@master/fonts/ttf/Montserrat-Medium.ttf", fontWeight: 500 },
-    { src: "https://cdn.jsdelivr.net/gh/JulietaUla/Montserrat@master/fonts/ttf/Montserrat-SemiBold.ttf", fontWeight: 600 },
-    { src: "https://cdn.jsdelivr.net/gh/JulietaUla/Montserrat@master/fonts/ttf/Montserrat-Bold.ttf", fontWeight: 700 },
-  ],
-});
 
 const MARGIN = 28;
 const W = 612 - MARGIN * 2;
@@ -62,7 +52,7 @@ const THEME_LABELS: Record<string, string> = {
 };
 
 const styles = StyleSheet.create({
-  page: { padding: MARGIN, fontFamily: "Montserrat" },
+  page: { padding: MARGIN, fontFamily: "Helvetica" },
   header: {
     height: H6,
     justifyContent: "center",
@@ -92,7 +82,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row" },
   cell: {
     textAlign: "center",
-    fontFamily: "Montserrat",
+    fontFamily: "Helvetica",
     fontWeight: 600,
     borderWidth: 0.5,
     borderColor: "#ccc",
