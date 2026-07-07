@@ -187,9 +187,8 @@ function OnlineGrid({ data, onComplete }: { data: WordSearchOutput; onComplete?:
                   data-col={c}
                   onMouseDown={() => handleStart(r, c)}
                   onMouseEnter={() => handleMove(r, c)}
-                  onTouchStart={(e) => { e.preventDefault(); handleStart(r, c); }}
+                  onTouchStart={() => handleStart(r, c)}
                   onTouchMove={(e) => {
-                    e.preventDefault();
                     const touch = e.touches[0];
                     if (!touch) return;
                     const el = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement | null;
