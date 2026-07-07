@@ -4,6 +4,7 @@ import type { WordSearchConfig, WordSearchOutput } from "./types";
 interface WordSearchProps {
   data: WordSearchOutput;
   config: WordSearchConfig;
+  onComplete?: () => void;
 }
 
 function getLineCells(
@@ -45,10 +46,18 @@ const cellStyle = {
   transition: "all 0.15s ease",
 };
 
-function OnlineGrid({ data }: { data: WordSearchOutput }) {
+function OnlineGrid({ data, onComplete }: { data: WordSearchOutput; onComplete?: () => void }) {
   const { grid, words } = data;
   const [found, setFound] = useState<Set<string>>(new Set());
   const [highlighted, setHighlighted] = useState<Set<string>>(new Set());
+  const completedRef = useRef(false);
+
+  useEffect(() => {
+    if (found.size === words.length && words.length > 0 && !completedRef.current) {
+      completedRef.current = true;
+      onComplete?.();
+    }
+  }, [found, words.length, onComplete]);
 
   const foundCellKeys = useMemo(() => {
     const keys = new Set<string>();
@@ -290,9 +299,9 @@ function PrintGrid({ data }: { data: WordSearchOutput }) {
   );
 }
 
-export default function WordSearch({ data, config }: WordSearchProps) {
+export default function WordSearch({ data, config, onComplete }: WordSearchProps) {
   if (config.showSolution) return <PreviewGrid data={data} />;
-  if (config.mode === "online") return <OnlineGrid data={data} />;
+  if (config.mode === "online") return <OnlineGrid data={data} onComplete={onComplete} />;
   return <PrintGrid data={data} />;
 }
 

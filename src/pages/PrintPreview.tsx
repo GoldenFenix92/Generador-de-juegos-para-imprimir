@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Document, Page, StyleSheet } from "@react-pdf/renderer";
 import { getGameDefinition, getPDFComponent } from "../lib/gameRegistry";
 import type { GameId } from "../lib/gameRegistry";
 import { Button } from "../components/ui/Button";
@@ -14,6 +15,10 @@ const GAME_LABELS: Record<string, string> = {
   tictactoe: "Tres en Raya",
 };
 
+const pdfStyles = StyleSheet.create({
+  page: { padding: 0, fontFamily: "Helvetica" },
+});
+
 export default function PrintPreview() {
   const navigate = useNavigate();
   const { game: gameParam } = useParams<{ game: string }>();
@@ -23,21 +28,40 @@ export default function PrintPreview() {
   const stored = useGeneratorStore((s) => s.data[gameId]);
 
   const [PDFComponent, setPDFComponent] = useState<React.FC<any> | null>(null);
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
     getPDFComponent(gameId).then((mod) => setPDFComponent(() => mod.default));
   }, [gameId]);
 
-  const data = stored?.output ?? null;
+  const rawData = stored?.output ?? null;
   const config = stored?.config ?? definition?.defaultConfig;
 
+  const dataArray = Array.isArray(rawData) ? rawData : (rawData ? [rawData] : []);
+  const totalPages = dataArray.length;
+  const currentData = dataArray[page] ?? null;
+
   function buildDoc() {
-    if (!data || !config || !PDFComponent) return null;
-    return (
-      <GamePDFDocument>
-        <PDFComponent data={data} config={config} />
-      </GamePDFDocument>
-    );
+    if (!config || !PDFComponent) return null;
+    if (dataArray.length > 1) {
+      return (
+        <Document>
+          {dataArray.map((d, i) => (
+            <Page key={i} size="LETTER" style={pdfStyles.page}>
+              <PDFComponent data={d} config={config} />
+            </Page>
+          ))}
+        </Document>
+      );
+    }
+    if (currentData) {
+      return (
+        <GamePDFDocument>
+          <PDFComponent data={currentData} config={config} />
+        </GamePDFDocument>
+      );
+    }
+    return null;
   }
 
   async function handleDownload() {
@@ -88,7 +112,7 @@ export default function PrintPreview() {
       </Button>
       <h1 className="mb-6 text-2xl font-bold text-primary">Vista previa - {label}</h1>
 
-      <div className="glass-card mb-6 p-4 flex gap-3 w-fit">
+      <div className="glass-card mb-6 p-4 flex gap-3 flex-wrap items-center">
         <Button
           variant="primary"
           slideIcon={
@@ -115,7 +139,39 @@ export default function PrintPreview() {
         </Button>
       </div>
 
-      {data && config && <definition.Preview data={data as any} config={config as any} />}
+      {totalPages > 1 && (
+        <div className="glass-card mb-4 p-3 flex items-center justify-center gap-4">
+          <button
+            type="button"
+            disabled={page === 0}
+            onClick={() => setPage((p) => p - 1)}
+            className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-all disabled:opacity-30 hover:bg-white/10"
+            style={{ color: "var(--text-primary)" }}
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Anterior
+          </button>
+          <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>
+            Sopa {page + 1} de {totalPages}
+          </span>
+          <button
+            type="button"
+            disabled={page === totalPages - 1}
+            onClick={() => setPage((p) => p + 1)}
+            className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-all disabled:opacity-30 hover:bg-white/10"
+            style={{ color: "var(--text-primary)" }}
+          >
+            Siguiente
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {currentData && config && <definition.Preview data={currentData as any} config={config as any} />}
     </div>
   );
 }

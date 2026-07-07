@@ -25,6 +25,7 @@ interface WSConfig extends GameConfig {
   generationMode: GenerationMode;
   theme?: ThemeId;
   customWords?: string[];
+  sheetCount: number;
 }
 
 function WordSearchOptions({
@@ -33,6 +34,7 @@ function WordSearchOptions({
   generationMode,
   theme,
   customWords,
+  sheetCount,
   onChange,
 }: {
   wordCount: number;
@@ -40,6 +42,7 @@ function WordSearchOptions({
   generationMode: GenerationMode;
   theme?: ThemeId;
   customWords?: string[];
+  sheetCount: number;
   onChange: (patch: Partial<WSConfig>) => void;
 }) {
   const [customText, setCustomText] = useState(customWords?.join(", ") ?? "");
@@ -112,6 +115,18 @@ function WordSearchOptions({
       </div>
 
       <div>
+        <label className="mb-1 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>Cantidad de sopas</label>
+        <Select
+          value={String(sheetCount)}
+          onChange={(e) => onChange({ sheetCount: Number(e.target.value) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 })}
+        >
+          {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+            <option key={n} value={n}>{n} sopa{n > 1 ? "s" : ""}</option>
+          ))}
+        </Select>
+      </div>
+
+      <div>
         <label className="mb-1 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>Modo</label>
         <Select
           value={mode}
@@ -158,7 +173,10 @@ export default function Generator() {
   function regenerate() {
     if (!definition) return;
     setCurrentConfig(gameId, config);
-    const newData = definition.generate(config);
+    const count = config.sheetCount ?? 1;
+    const newData = isWordSearch && count > 1
+      ? Array.from({ length: count }, () => definition.generate(config))
+      : definition.generate(config);
     setData(newData);
     setGeneratedData(gameId, config, newData);
   }
@@ -280,6 +298,7 @@ export default function Generator() {
             generationMode={config.generationMode ?? "random"}
             theme={config.theme}
             customWords={config.customWords}
+            sheetCount={config.sheetCount ?? 1}
             onChange={patch}
           />
         )}
@@ -340,10 +359,19 @@ export default function Generator() {
         </div>
       </div>
 
-      {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        data && <definition.Preview data={data as any} config={previewConfig as any} />
-      }
+      {data && (
+        <>
+          {Array.isArray(data) && (
+            <p className="text-sm mb-2" style={{ color: "var(--text-muted)" }}>
+              Sopa 1 de {data.length}
+            </p>
+          )}
+          <definition.Preview
+            data={Array.isArray(data) ? (data[0] as any) : (data as any)}
+            config={previewConfig as any}
+          />
+        </>
+      )}
     </div>
   );
 }

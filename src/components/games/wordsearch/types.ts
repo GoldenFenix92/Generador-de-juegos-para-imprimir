@@ -29,6 +29,7 @@ export interface WordSearchConfig {
   generationMode: GenerationMode;
   theme?: ThemeId;
   customWords?: string[];
+  sheetCount?: number;
 }
 
 export interface WordSearchOutput {
