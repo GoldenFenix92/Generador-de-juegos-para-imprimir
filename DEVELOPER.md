@@ -23,10 +23,13 @@
 src/
   components/
     games/           # Juegos (cada uno con su carpeta)
-    layout/          # Layout principal, header, footer, theme
+    layout/          # Layout principal, navbar, theme toggle, blobs
     pdf/             # Componente base PDF (envoltura @react-pdf)
     ui/              # Componentes de interfaz reutilizables
-  data/              # Datos estaticos (wordbank)
+      Button.tsx     # Boton con 3 variantes + slideIcon
+      Select.tsx     # Select con estilo glass
+      DifficultySelector.tsx  # Selector de dificultad colapsable
+  data/              # Datos estaticos (wordbank ~2600 palabras, 13 categorias)
   lib/               # Logica compartida
     algorithms/      # Algoritmos genericos (grid, shuffle)
     gameRegistry.ts  # Registro de juegos (Strategy Pattern)
@@ -75,11 +78,31 @@ src/components/games/<game>/
 
 ---
 
-## Sistema de diseño glassmorphism
+## Sistema de diseno crystal glass
 
 ### Archivo clave: `src/app.css`
 
 Usa Tailwind CSS v4 con `@theme`, `@utility` y variables CSS para theming completo.
+
+### Crystal glass effect
+
+Inspirado en Spatial UI / VisionOS — mas cristalino que el glass standard:
+
+| Propiedad | Valor | Efecto |
+|-----------|-------|--------|
+| backdrop-filter | `blur(40px) saturate(180%)` | Alto desenfoque con saturacion para brillo tipo cristal |
+| background | `rgba(255,255,255,0.25)` light / `rgba(255,255,255,0.06)` dark | Muy transparente |
+| border | `0.5px solid` | Bordes finisimos tipo hairline |
+| border-radius | `24px` cards / `22px` botones / `14px` selects |
+
+### Sombras
+
+| Elemento | Sombra | Opacidad |
+|----------|--------|----------|
+| Card normal | `0 2px 8px + 0 8px 32px` | 0.04-0.06 |
+| Card hover | `0 4px 16px + 0 12px 48px` | 0.06-0.08 |
+| Boton | `0 2px 8px` | 0.06 |
+| Boton hover | `0 4px 16px accent-glow` | Con color |
 
 ### Temas: `.light` y `.dark`
 
@@ -87,57 +110,40 @@ Cada tema define ~30 variables CSS:
 
 | Variable | Light | Dark | Proposito |
 |----------|-------|------|-----------|
-| `--bg-base` | `#F1F5F9` | `#0F172A` | Fondo base |
-| `--bg-gradient` | gradiente suave | gradiente oscuro | Fondo del body |
-| `--card-bg` | `rgba(255,255,255,0.65)` | `rgba(255,255,255,0.05)` | Fondo de tarjetas glass |
-| `--card-border` | `rgba(255,255,255,0.5)` | `rgba(255,255,255,0.12)` | Borde de tarjetas |
-| `--accent` | `#0D9488` (teal) | `#14B8A6` (teal claro) | Color primario de acento |
-| `--accent-glow` | `rgba(13,148,136,0.15)` | `rgba(20,184,166,0.2)` | Brillo del acento |
-| `--text-primary` | `#1E293B` | `#F1F5F9` | Texto principal |
-| `--text-muted` | `#64748B` | `#94A3B8` | Texto secundario |
+| `--bg-base` | `#FAF5FF` | `#07080F` | Fondo base |
+| `--bg-gradient` | `#FAF5FF → #F0F4FF` | `#07080F → #0F1123` | Fondo del body |
+| `--card-bg` | `rgba(255,255,255,0.25)` | `rgba(255,255,255,0.06)` | Fondo de tarjetas glass |
+| `--card-border` | `rgba(255,255,255,0.48)` | `rgba(99,102,241,0.15)` | Borde de tarjetas |
+| `--accent` | `#6366F1` (indigo) | `#818CF8` (indigo claro) | Color primario de acento |
+| `--accent-glow` | `rgba(99,102,241,0.15)` | `rgba(129,140,248,0.12)` | Brillo del acento |
+| `--secondary` | `#2DD4BF` (teal) | `#2DD4BF` (teal) | Color secundario |
+| `--secondary-glow` | `rgba(45,212,191,0.15)` | `rgba(45,212,191,0.12)` | Brillo secundario |
+| `--rose` | `#F472B6` (pink) | `#EC4899` (pink) | Color de CTA / acento |
+| `--rose-glow` | `rgba(244,114,182,0.2)` | `rgba(236,72,153,0.2)` | Brillo de CTA |
+| `--text-primary` | `#1E1B4B` | `#F1F5F9` | Texto principal |
+| `--text-muted` | `#6B7280` | `#94A3B8` | Texto secundario |
 
 ### Paleta de colores
 
-- **Primario (Teal):** `#0D9488` / `#14B8A6` — fresco, amigable, funciona para niños y adultos
-- **Secundario (Violeta):** `#8B5CF6` — toque creativo
-- **Acento cálido (Ambar):** `#D97706` — para CTAs y elementos de accion
-- **Blobs ambientales:** Teal, Violeta, Amarillo (light) / Teal, Violeta, Ambar (dark)
-
-### Efecto glass
-
-Implementado con:
-- `backdrop-filter: blur(24px)` — desenfoque tipo vidrio
-- `background: rgba(...)` con opacidad baja — transparencia
-- `border: 1px solid rgba(...)` — bordes semitransparentes visibles
-- Sombras con expansion media y opacidad muy baja:
-  - Cards: `0 2px 8px (0.04)` + `0 8px 32px (0.06)`
-  - Hover: `0 4px 16px (0.06)` + `0 12px 48px (0.08)`
-  - Botones: `0 2px 8px (0.06)`
-
-### Paleta de sombras
-
-| Elemento | Sombra | Expansion | Opacidad |
-|----------|--------|-----------|----------|
-| Card normal | `0 2px 8px + 0 8px 32px` | Media | Muy tenue (0.04-0.06) |
-| Card hover | `0 4px 16px + 0 12px 48px` | Media-alta | Tenue (0.06-0.08) |
-| Boton | `0 2px 8px` | Media | Muy tenue (0.06) |
-| Boton hover | `0 4px 16px accent-glow` | Media | Con color |
+- **Primario (Indigo):** `#6366F1` / `#818CF8` — energia creativa con legibilidad educativa
+- **Secundario (Teal):** `#2DD4BF` — frescura, contraste equilibrado
+- **Acento (Rose):** `#EC4899` / `#F472B6` — para CTAs y elementos de accion
+- **Blobs ambientales:** Indigo, Teal, Rose con animacion flotante
 
 ### Custom utilities de Tailwind
 
 Definidas con `@utility` en app.css:
-- `glass-card` — tarjeta con efecto vidrio
+- `glass-card` — tarjeta con efecto cristal
 - `glass-card-hover` — tarjeta con hover elevacion
-- `glass-btn` — boton tipo vidrio con Estados
-- `glass-select` — selector tipo vidrio
+- `glass-btn` — boton tipo cristal con estados
+- `glass-select` — selector tipo cristal
 - `text-primary`, `text-muted`, `text-accent` — colores de texto
-- `glow-accent` — sombra glow del acento
+- `glow-accent`, `glow-secondary`, `glow-rose` — sombra glow por color
 - `blob`, `blob-delayed`, `blob-slow` — animaciones ambientales
 
 ### Tipografia
 
-- **Headings:** Crimson Pro (serif) — Google Fonts
-- **Body:** Atkinson Hyperlegible (sans-serif) — Google Fonts, disenada para legibilidad
+- **Headings y Body:** Inter (sans-serif) — Google Fonts, recomendada para interfaces glass/spatial
 
 ---
 
@@ -147,37 +153,56 @@ Definidas con `@utility` en app.css:
 
 1. El tema se detecta al cargar la pagina via `prefers-color-scheme` o `localStorage.theme`
 2. Se aplica como clase `.dark` o `.light` en `<html>` (script inline en `index.html` para evitar FOUC)
-3. El componente `ThemeToggle` en `Layout.tsx` permite alternar manualmente
+3. El componente `ThemeToggle` en `Layout.tsx` permite alternar manualmente mediante slider switch (sol/luna con animacion translateX)
 4. La preferencia se persiste en `localStorage`
 
 ### Variables condicionales
 
 ```css
-.light { --card-bg: rgba(255, 255, 255, 0.65); }
-.dark  { --card-bg: rgba(255, 255, 255, 0.05); }
+.light { --card-bg: rgba(255, 255, 255, 0.25); }
+.dark  { --card-bg: rgba(255, 255, 255, 0.06); }
 ```
 
 No se usan `@media (prefers-color-scheme)` ni variantes `dark:` de Tailwind; el theming se maneja 100% con clases y variables CSS.
 
 ---
 
+## Navegacion (Navbar)
+
+Barra superior centrada con 5 items: Inicio, Sopa, Sudoku, Laberinto, Tres Raya.
+
+Cada item comienza como un circulo de 48px con icono SVG. Al hacer hover, se expande a 120px (`hover:w-[120px]`) con `transition-all duration-500` y muestra el nombre del juego. El hover incluye un gradient indigo-rose.
+
+Los links se implementan con `<NavLink>` de React Router para resaltar el item activo con `activeClass` de Tailwind.
+
+---
+
 ## Componentes UI
 
 ### Button (`src/components/ui/Button.tsx`)
-Wrapper del `<button>` nativo con clase `glass-btn`. Hereda todas las variables de tema.
+
+3 variantes con sistema de animacion slideIcon:
+
+| Variant | Estilo | Uso |
+|---------|--------|-----|
+| `primary` | Gradient indigo-rose + glow | Accion principal |
+| `secondary` | Glass con borde semitransparente | Accion secundaria |
+| `tertiary` | Ghost con blur-sm tenue | Volver / acciones sutiles |
+
+Prop `slideIcon`: cuando se provee un elemento JSX, al hacer hover el texto se desliza horizontalmente y un overlay con el icono escala de 0 a 1.
 
 ### Select (`src/components/ui/Select.tsx`)
 Wrapper del `<select>` nativo con clase `glass-select`. Los `<option>` usan `var(--option-bg)` para coincidir con el tema.
 
 ### DifficultySelector (`src/components/ui/DifficultySelector.tsx`)
-Select con 4 opciones: Facil, Medio, Dificil, Experto. Las opciones son configurables via prop.
+Selector colapsable con 4 niveles: Facil, Medio, Dificil, Experto.
 
 ---
 
 ## Sopa de Letras — Funcionalidades especificas
 
 ### Modos de generacion
-- **Aleatorio:** palabras aleatorias del banco general
+- **Aleatorio:** palabras aleatorias del banco general (~2600 palabras, 13 categorias)
 - **Tematico:** palabras filtradas por tematica (12 temas: naturaleza, autos, valores, animales, etc.)
 - **Personalizado:** el usuario ingresa sus propias palabras
 
@@ -246,6 +271,13 @@ Directorio: `.opencode/skills/`
 | `game-definition` | Interfaz GameDefinition para definir juegos |
 | `react-pdf-builder` | Guia de uso de @react-pdf/renderer para PDFs vectoriales |
 | `ui-ux-pro-max` | Sistema de diseno premium con glassmorphism, paletas, tipografia y micro-interacciones |
+| `customize-opencode` | Configuracion del asistente opencode |
+| `brand` | Voz de marca, identidad visual, guias de estilo |
+| `design` | Diseno integral: identidad corporativa, logotipos, banners, iconos |
+| `design-system` | Arquitectura de tokens, especificaciones de componentes |
+| `slides` | Creacion de presentaciones HTML con Chart.js |
+| `ui-styling` | Creacion de interfaces de usuario accesibles |
+| `banner-design` | Diseno de banners para redes sociales, ads, web y print |
 
 Los skills se cargan automaticamente segun el contexto de la conversacion con la IA.
 

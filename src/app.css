@@ -3,48 +3,48 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-accent: #0D9488;
-  --color-accent-hover: #0F766E;
-  --color-accent-glow: rgba(13, 148, 136, 0.3);
-  --color-secondary: #8B5CF6;
-  --color-warm: #D97706;
-  --font-heading: "Crimson Pro", Georgia, serif;
-  --font-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --color-accent: #6366F1;
+  --color-accent-hover: #4F46E5;
+  --color-accent-glow: rgba(99, 102, 241, 0.35);
+  --color-secondary: #2DD4BF;
+  --color-warm: #EC4899;
+  --font-heading: Inter, system-ui, sans-serif;
+  --font-body: Inter, system-ui, sans-serif;
 }
 
 @utility glass-card {
-  border-radius: 16px;
+  border-radius: 24px;
   background: var(--card-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--card-border);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 0.5px solid var(--card-border);
   box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    0 8px 32px rgba(0, 0, 0, 0.06);
+    0 4px 6px -1px rgba(0, 0, 0, 0.03),
+    0 12px 40px rgba(0, 0, 0, 0.05);
 }
 
 @utility glass-card-hover {
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   &:hover {
-    transform: translateY(-3px);
+    transform: translateY(-4px);
     border-color: var(--accent);
     box-shadow:
-      0 4px 16px rgba(0, 0, 0, 0.06),
-      0 12px 48px rgba(0, 0, 0, 0.08);
+      0 8px 20px rgba(0, 0, 0, 0.05),
+      0 20px 60px rgba(0, 0, 0, 0.07);
   }
 }
 
 @utility glass-btn {
-  border-radius: 20px;
+  border-radius: 22px;
   padding: 0.5rem 1.25rem;
   font-size: 0.875rem;
   font-weight: 600;
   background: var(--btn-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--btn-border);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 0.5px solid var(--btn-border);
   color: var(--btn-text);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   &:hover:not(:disabled) {
@@ -63,13 +63,13 @@
 }
 
 @utility glass-select {
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
   background: var(--select-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--select-border);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 0.5px solid var(--select-border);
   color: var(--text-primary);
   transition: all 0.2s ease;
   cursor: pointer;
@@ -97,21 +97,21 @@
 }
 
 @utility glow-accent {
-  box-shadow: 0 0 24px var(--accent-glow);
+  box-shadow: 0 0 30px var(--accent-glow);
 }
 
 @keyframes blob-drift {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(30px, -20px) scale(1.05); }
-  50% { transform: translate(-20px, 15px) scale(0.95); }
-  75% { transform: translate(15px, 25px) scale(1.02); }
+  25% { transform: translate(35px, -25px) scale(1.05); }
+  50% { transform: translate(-25px, 18px) scale(0.95); }
+  75% { transform: translate(18px, 30px) scale(1.02); }
 }
 
 @utility blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.08;
+  filter: blur(100px);
+  opacity: 0.1;
   pointer-events: none;
   animation: blob-drift 20s ease-in-out infinite;
 }
@@ -125,50 +125,50 @@
 }
 
 .light {
-  --bg-base: #F1F5F9;
+  --bg-base: #FAF5FF;
   --bg-elevated: #FFFFFF;
-  --bg-gradient: linear-gradient(145deg, #F8FAFC 0%, #EFF6FF 40%, #F0FDF4 100%);
-  --card-bg: rgba(255, 255, 255, 0.65);
-  --card-border: rgba(255, 255, 255, 0.5);
-  --btn-bg: rgba(13, 148, 136, 0.12);
-  --btn-bg-hover: rgba(13, 148, 136, 0.2);
-  --btn-border: rgba(13, 148, 136, 0.2);
-  --btn-text: #0F766E;
-  --select-bg: rgba(255, 255, 255, 0.65);
-  --select-border: rgba(148, 163, 184, 0.5);
-  --option-bg: #F8FAFC;
-  --text-primary: #1E293B;
-  --text-muted: #64748B;
-  --accent: #0D9488;
-  --accent-hover: #0F766E;
-  --accent-glow: rgba(13, 148, 136, 0.15);
-  --blob-1: #2DD4BF;
-  --blob-2: #A78BFA;
-  --blob-3: #FDE047;
+  --bg-gradient: linear-gradient(145deg, #FAF5FF 0%, #F0F4FF 40%, #FDF2F8 100%);
+  --card-bg: rgba(255, 255, 255, 0.25);
+  --card-border: rgba(99, 102, 241, 0.12);
+  --btn-bg: rgba(99, 102, 241, 0.1);
+  --btn-bg-hover: rgba(99, 102, 241, 0.18);
+  --btn-border: rgba(99, 102, 241, 0.15);
+  --btn-text: #4F46E5;
+  --select-bg: rgba(255, 255, 255, 0.25);
+  --select-border: rgba(99, 102, 241, 0.1);
+  --option-bg: #F0F4FF;
+  --text-primary: #1E1B4B;
+  --text-muted: #6B7280;
+  --accent: #6366F1;
+  --accent-hover: #4F46E5;
+  --accent-glow: rgba(99, 102, 241, 0.18);
+  --blob-1: #818CF8;
+  --blob-2: #2DD4BF;
+  --blob-3: #F472B6;
   color-scheme: light;
 }
 
 .dark {
-  --bg-base: #0F172A;
-  --bg-elevated: #1E293B;
-  --bg-gradient: linear-gradient(145deg, #0F172A 0%, #111827 50%, #1A2035 100%);
-  --card-bg: rgba(255, 255, 255, 0.05);
-  --card-border: rgba(255, 255, 255, 0.12);
-  --btn-bg: rgba(13, 148, 136, 0.15);
-  --btn-bg-hover: rgba(13, 148, 136, 0.25);
-  --btn-border: rgba(13, 148, 136, 0.2);
-  --btn-text: #5EEAD4;
-  --select-bg: rgba(255, 255, 255, 0.05);
-  --select-border: rgba(255, 255, 255, 0.15);
-  --option-bg: #1E293B;
+  --bg-base: #07080F;
+  --bg-elevated: #0B0E1A;
+  --bg-gradient: linear-gradient(145deg, #07080F 0%, #0B0E1A 50%, #0F1123 100%);
+  --card-bg: rgba(255, 255, 255, 0.06);
+  --card-border: rgba(99, 102, 241, 0.15);
+  --btn-bg: rgba(99, 102, 241, 0.12);
+  --btn-bg-hover: rgba(99, 102, 241, 0.22);
+  --btn-border: rgba(99, 102, 241, 0.18);
+  --btn-text: #A5B4FC;
+  --select-bg: rgba(255, 255, 255, 0.04);
+  --select-border: rgba(99, 102, 241, 0.12);
+  --option-bg: #0B0E1A;
   --text-primary: #F1F5F9;
-  --text-muted: #94A3B8;
-  --accent: #14B8A6;
-  --accent-hover: #2DD4BF;
-  --accent-glow: rgba(20, 184, 166, 0.2);
-  --blob-1: #0D9488;
-  --blob-2: #7C3AED;
-  --blob-3: #D97706;
+  --text-muted: #8A8F98;
+  --accent: #818CF8;
+  --accent-hover: #A5B4FC;
+  --accent-glow: rgba(129, 140, 248, 0.2);
+  --blob-1: #6366F1;
+  --blob-2: #2DD4BF;
+  --blob-3: #EC4899;
   color-scheme: dark;
 }
 
@@ -185,6 +185,8 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 ::selection {
