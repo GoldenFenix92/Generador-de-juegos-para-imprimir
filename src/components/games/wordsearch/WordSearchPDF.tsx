@@ -53,18 +53,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  title: { fontSize: 16, fontWeight: 700, letterSpacing: 1 },
-  subtitle: { fontSize: 9, marginTop: 1, color: "#666", fontWeight: 400 },
+  title: { fontSize: 18, fontWeight: 700, letterSpacing: 1 },
+  subtitle: { fontSize: 11, marginTop: 2, color: "#555", fontWeight: 500 },
   instructions: {
-    height: H4,
+    height: H4 + 4,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 4,
+    paddingHorizontal: 6,
   },
   instrText: {
-    fontSize: 7.5,
-    color: "#888",
-    fontWeight: 400,
+    fontSize: 9.5,
+    color: "#666",
+    fontWeight: 700,
+    fontStyle: "italic",
     textAlign: "center",
   },
   body: {
@@ -92,7 +93,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   list: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center" },
-  word: { fontSize: 8, marginHorizontal: 4, marginBottom: 2, color: "#333", fontWeight: 500 },
+  word: { fontSize: 11, marginHorizontal: 5, marginBottom: 3, color: "#222", fontWeight: 600 },
 });
 
 interface Props {
