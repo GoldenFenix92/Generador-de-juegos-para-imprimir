@@ -33,21 +33,42 @@ function getLineCells(
   return cells;
 }
 
-const cellStyle = {
-  display: "flex",
-  alignItems: "center" as const,
-  justifyContent: "center" as const,
-  width: "36px",
-  height: "36px",
-  fontFamily: "var(--font-body)",
-  fontSize: "0.875rem",
-  fontWeight: 700,
-  borderRadius: "4px",
-  transition: "all 0.15s ease",
-};
+const GAP_PX = 4;
+const GRID_PAD = 16;
+
+function useResponsiveCell(cols: number, maxCell = 36) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [cellPx, setCellPx] = useState(maxCell);
+
+  useEffect(() => {
+    function calc() {
+      if (!ref.current) return;
+      const avail = ref.current.clientWidth - GRID_PAD;
+      const gaps = (cols - 1) * GAP_PX;
+      const px = Math.floor((avail - gaps) / cols);
+      setCellPx(Math.min(Math.max(px, 16), maxCell));
+    }
+
+    calc();
+    const observer = new ResizeObserver(calc);
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [cols, maxCell]);
+
+  return { ref, cellPx };
+}
+
+function cellFontSize(cellPx: number): string {
+  if (cellPx >= 32) return "0.875rem";
+  if (cellPx >= 24) return "0.75rem";
+  if (cellPx >= 18) return "0.7rem";
+  return "0.625rem";
+}
 
 function OnlineGrid({ data, onComplete }: { data: WordSearchOutput; onComplete?: () => void }) {
   const { grid, words } = data;
+  const cols = grid[0]?.length ?? 0;
+  const { ref: gridRef, cellPx } = useResponsiveCell(cols);
   const [found, setFound] = useState<Set<string>>(new Set());
   const [highlighted, setHighlighted] = useState<Set<string>>(new Set());
   const completedRef = useRef(false);
@@ -77,14 +98,14 @@ function OnlineGrid({ data, onComplete }: { data: WordSearchOutput; onComplete?:
   const foundRef = useRef(found);
   useEffect(() => { foundRef.current = found; }, [found]);
 
-  const handleMouseDown = useCallback((row: number, col: number) => {
+  const handleStart = useCallback((row: number, col: number) => {
     selecting.current = true;
     startRef.current = [row, col];
     endRef.current = [row, col];
     setHighlighted(new Set([`${row},${col}`]));
   }, []);
 
-  const handleMouseEnter = useCallback((row: number, col: number) => {
+  const handleMove = useCallback((row: number, col: number) => {
     if (!selecting.current || !startRef.current) return;
     endRef.current = [row, col];
     const [sr, sc] = startRef.current;
@@ -92,45 +113,65 @@ function OnlineGrid({ data, onComplete }: { data: WordSearchOutput; onComplete?:
     setHighlighted(new Set(cells.map(([r, c]) => `${r},${c}`)));
   }, []);
 
-  useEffect(() => {
-    function onMouseUp() {
-      if (!selecting.current) return;
-      selecting.current = false;
+  const handleEnd = useCallback(() => {
+    if (!selecting.current) return;
+    selecting.current = false;
 
-      const start = startRef.current;
-      const end = endRef.current;
-      startRef.current = null;
-      endRef.current = null;
-      setHighlighted(new Set());
+    const start = startRef.current;
+    const end = endRef.current;
+    startRef.current = null;
+    endRef.current = null;
+    setHighlighted(new Set());
 
-      if (!start || !end) return;
-      const [sr, sc] = start;
-      const [er, ec] = end;
-      const cells = getLineCells(sr, sc, er, ec);
-      if (cells.length < 2) return;
+    if (!start || !end) return;
+    const [sr, sc] = start;
+    const [er, ec] = end;
+    const cells = getLineCells(sr, sc, er, ec);
+    if (cells.length < 2) return;
 
-      const wordStr = cells.map(([r, c]) => grid[r][c]).join("");
-      const reversed = wordStr.split("").reverse().join("");
+    const wordStr = cells.map(([r, c]) => grid[r][c]).join("");
+    const reversed = wordStr.split("").reverse().join("");
 
-      for (const w of words) {
-        if (foundRef.current.has(w)) continue;
-        if (w === wordStr || w === reversed) {
-          setFound((prev) => new Set(prev).add(w));
-          break;
-        }
+    for (const w of words) {
+      if (foundRef.current.has(w)) continue;
+      if (w === wordStr || w === reversed) {
+        setFound((prev) => new Set(prev).add(w));
+        break;
       }
     }
-
-    document.addEventListener("mouseup", onMouseUp);
-    return () => document.removeEventListener("mouseup", onMouseUp);
   }, [grid, words]);
 
+  useEffect(() => {
+    function onMouseUp() { handleEnd(); }
+    function onTouchEnd() { handleEnd(); }
+
+    document.addEventListener("mouseup", onMouseUp);
+    document.addEventListener("touchend", onTouchEnd);
+    return () => {
+      document.removeEventListener("mouseup", onMouseUp);
+      document.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [handleEnd]);
+
+  const cellStyle: React.CSSProperties = useMemo(() => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: cellPx,
+    height: cellPx,
+    fontFamily: "var(--font-body)",
+    fontSize: cellFontSize(cellPx),
+    fontWeight: 700,
+    borderRadius: "4px",
+    transition: "all 0.15s ease",
+  }), [cellPx]);
+
   return (
-    <div className="flex flex-col items-center gap-6">
-      <div className="glass-card !p-2" style={{ display: "inline-block" }}>
+    <div className="flex flex-col items-center gap-6 w-full">
+      <div ref={gridRef} className="glass-card !p-2 w-full overflow-hidden">
         <div
-          className="grid gap-1"
-          style={{ gridTemplateColumns: `repeat(${grid[0].length}, 36px)` }}
+          className="grid gap-1 touch-none select-none"
+          style={{ gridTemplateColumns: `repeat(${cols}, ${cellPx}px)` }}
         >
           {grid.map((row, r) =>
             row.map((cell, c) => {
@@ -142,8 +183,22 @@ function OnlineGrid({ data, onComplete }: { data: WordSearchOutput; onComplete?:
                 <button
                   key={key}
                   type="button"
-                  onMouseDown={() => handleMouseDown(r, c)}
-                  onMouseEnter={() => handleMouseEnter(r, c)}
+                  data-row={r}
+                  data-col={c}
+                  onMouseDown={() => handleStart(r, c)}
+                  onMouseEnter={() => handleMove(r, c)}
+                  onTouchStart={(e) => { e.preventDefault(); handleStart(r, c); }}
+                  onTouchMove={(e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    if (!touch) return;
+                    const el = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement | null;
+                    const cellEl = el?.closest("[data-row]") as HTMLElement | null;
+                    if (!cellEl) return;
+                    const tr = parseInt(cellEl.getAttribute("data-row")!, 10);
+                    const tc = parseInt(cellEl.getAttribute("data-col")!, 10);
+                    handleMove(tr, tc);
+                  }}
                   style={{
                     ...cellStyle,
                     backgroundColor: isFound
@@ -168,7 +223,7 @@ function OnlineGrid({ data, onComplete }: { data: WordSearchOutput; onComplete?:
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 justify-center">
+      <div className="flex flex-wrap gap-2 justify-center px-2">
         {words.map((word) => {
           const wFound = found.has(word);
           return (
@@ -197,6 +252,8 @@ function OnlineGrid({ data, onComplete }: { data: WordSearchOutput; onComplete?:
 
 function PreviewGrid({ data }: { data: WordSearchOutput }) {
   const { grid, words, positions } = data;
+  const cols = grid[0]?.length ?? 0;
+  const { ref: gridRef, cellPx } = useResponsiveCell(cols);
 
   const wordCells = new Map<string, string[]>();
   for (const pos of positions) {
@@ -217,12 +274,25 @@ function PreviewGrid({ data }: { data: WordSearchOutput }) {
     return false;
   }
 
+  const cellStyle: React.CSSProperties = useMemo(() => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: cellPx,
+    height: cellPx,
+    fontFamily: "var(--font-body)",
+    fontSize: cellFontSize(cellPx),
+    fontWeight: 700,
+    borderRadius: "4px",
+    transition: "all 0.15s ease",
+  }), [cellPx]);
+
   return (
-    <div className="flex flex-col items-center gap-6">
-      <div className="glass-card !p-2" style={{ display: "inline-block" }}>
+    <div className="flex flex-col items-center gap-6 w-full">
+      <div ref={gridRef} className="glass-card !p-2 w-full overflow-hidden">
         <div
           className="grid gap-1"
-          style={{ gridTemplateColumns: `repeat(${grid[0].length}, 36px)` }}
+          style={{ gridTemplateColumns: `repeat(${grid[0].length}, ${cellPx}px)` }}
         >
           {grid.map((row, r) =>
             row.map((cell, c) => (
@@ -245,7 +315,7 @@ function PreviewGrid({ data }: { data: WordSearchOutput }) {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 justify-center">
+      <div className="flex flex-wrap gap-2 justify-center px-2">
         {words.map((word) => (
           <span
             key={word}
@@ -261,12 +331,28 @@ function PreviewGrid({ data }: { data: WordSearchOutput }) {
 
 function PrintGrid({ data }: { data: WordSearchOutput }) {
   const { grid, words } = data;
+  const cols = grid[0]?.length ?? 0;
+  const { ref: gridRef, cellPx } = useResponsiveCell(cols);
+
+  const cellStyle: React.CSSProperties = useMemo(() => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: cellPx,
+    height: cellPx,
+    fontFamily: "var(--font-body)",
+    fontSize: cellFontSize(cellPx),
+    fontWeight: 700,
+    borderRadius: "4px",
+    transition: "all 0.15s ease",
+  }), [cellPx]);
+
   return (
-    <div className="flex flex-col items-center gap-6">
-      <div className="glass-card !p-2" style={{ display: "inline-block" }}>
+    <div className="flex flex-col items-center gap-6 w-full">
+      <div ref={gridRef} className="glass-card !p-2 w-full overflow-hidden">
         <div
           className="grid gap-1"
-          style={{ gridTemplateColumns: `repeat(${grid[0].length}, 36px)` }}
+          style={{ gridTemplateColumns: `repeat(${grid[0].length}, ${cellPx}px)` }}
         >
           {grid.map((row, r) =>
             row.map((cell, c) => (
@@ -285,7 +371,7 @@ function PrintGrid({ data }: { data: WordSearchOutput }) {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 justify-center">
+      <div className="flex flex-wrap gap-2 justify-center px-2">
         {words.map((word) => (
           <span
             key={word}

@@ -9,16 +9,17 @@ export default function Maze({ data }: MazeProps) {
   const { walls } = data;
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center w-full overflow-x-auto">
       <div
         className="grid gap-px bg-gray-300"
-        style={{ gridTemplateColumns: `repeat(${walls[0].length}, 20px)` }}
+        style={{ gridTemplateColumns: `repeat(${walls[0].length}, 18px)` }}
       >
         {walls.map((row, r) =>
           row.map((isWall, c) => (
             <div
               key={`${r}-${c}`}
-              className={`h-5 w-5 ${
+              style={{ width: 18, height: 18 }}
+              className={`${
                 r === 0 && c === 0
                   ? "bg-green-500"
                   : r === walls.length - 1 && c === walls[0].length - 1

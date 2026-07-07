@@ -9,7 +9,7 @@ export default function Sudoku({ data }: SudokuProps) {
   const { puzzle, solution } = data;
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center gap-6 w-full overflow-x-auto">
       <div className="grid grid-cols-9 gap-px bg-gray-300">
         {puzzle.map((row, r) =>
           row.map((cell, c) => {
@@ -21,7 +21,7 @@ export default function Sudoku({ data }: SudokuProps) {
             return (
               <div
                 key={`${r}-${c}`}
-                className={`flex h-9 w-9 items-center justify-center text-sm font-mono ${
+                className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center text-sm font-mono ${
                   isClue ? "font-bold text-gray-900" : "text-blue-600"
                 } bg-white ${borderRight ? "border-r-2 border-r-gray-800" : ""} ${
                   borderBottom ? "border-b-2 border-b-gray-800" : ""
