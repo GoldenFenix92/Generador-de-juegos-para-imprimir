@@ -23,9 +23,9 @@ function calcCell(g: number): { px: number; fs: number } {
 }
 
 const DIRECTION_LABELS: Record<string, string> = {
-  easy: "Las palabras pueden estar en estas direcciones: derecha (→) y abajo (↓).",
-  medium: "Las palabras pueden estar en estas direcciones: derecha (→), abajo (↓) y diagonal (↘).",
-  hard: "Las palabras pueden estar en estas direcciones: derecha, abajo, diagonal y sus reversas (←, ↑, ↖, ↙).",
+  easy: "Las palabras pueden estar en estas direcciones: horizontal (derecha) y vertical (abajo).",
+  medium: "Las palabras pueden estar en estas direcciones: horizontal, vertical y diagonal.",
+  hard: "Las palabras pueden estar en estas direcciones: horizontal, vertical, diagonal y sus reversas.",
   expert: "Las palabras pueden estar en todas las direcciones posibles, incluyendo palabras concatenadas entre si.",
 };
 
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fafafa",
   },
   footer: {
-    height: H - H80 - H6 - H4,
+    height: H - H80 - H6 - (H4 + 4),
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 10,
