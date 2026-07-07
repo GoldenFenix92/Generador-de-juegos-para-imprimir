@@ -168,7 +168,7 @@ function OnlineGrid({ data, onComplete }: { data: WordSearchOutput; onComplete?:
 
   return (
     <div className="flex flex-col items-center gap-6 w-full">
-      <div ref={gridRef} className="glass-card !p-2 w-full overflow-hidden">
+      <div ref={gridRef} className="glass-card !p-2 w-full sm:w-fit overflow-hidden">
         <div
           className="grid gap-1 touch-none select-none"
           style={{ gridTemplateColumns: `repeat(${cols}, ${cellPx}px)` }}
@@ -289,7 +289,7 @@ function PreviewGrid({ data }: { data: WordSearchOutput }) {
 
   return (
     <div className="flex flex-col items-center gap-6 w-full">
-      <div ref={gridRef} className="glass-card !p-2 w-full overflow-hidden">
+      <div ref={gridRef} className="glass-card !p-2 w-full sm:w-fit overflow-hidden">
         <div
           className="grid gap-1"
           style={{ gridTemplateColumns: `repeat(${grid[0].length}, ${cellPx}px)` }}
@@ -349,7 +349,7 @@ function PrintGrid({ data }: { data: WordSearchOutput }) {
 
   return (
     <div className="flex flex-col items-center gap-6 w-full">
-      <div ref={gridRef} className="glass-card !p-2 w-full overflow-hidden">
+      <div ref={gridRef} className="glass-card !p-2 w-full sm:w-fit overflow-hidden">
         <div
           className="grid gap-1"
           style={{ gridTemplateColumns: `repeat(${grid[0].length}, ${cellPx}px)` }}
