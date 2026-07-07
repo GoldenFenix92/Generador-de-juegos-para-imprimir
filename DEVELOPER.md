@@ -143,7 +143,7 @@ Definidas con `@utility` en app.css:
 
 ### Tipografia
 
-- **Headings y Body:** Inter (sans-serif) — Google Fonts, recomendada para interfaces glass/spatial
+- **Headings y Body:** Montserrat (sans-serif) — Google Fonts
 
 ---
 
@@ -215,6 +215,13 @@ Selector colapsable con 4 niveles: Facil, Medio, Dificil, Experto.
 | Dificil | 6 (+ reversas) | Cortas a largas | Si |
 | Experto | 8 (todas) | Cortas a largas | Si + concatenacion |
 
+### Generacion masiva (sheetCount)
+- Campo `sheetCount: number` (1-10) en `WordSearchConfig`
+- En Generator, al generar con `sheetCount > 1`, `regenerate()` produce un array de `WordSearchOutput[]`
+- El store guarda el array completo; la preview muestra la primera sopa con paginador
+- PrintPreview: paginacion entre sopas + PDF multi-pagina (un `<Page>` por sopa)
+- PlayOnline: paginacion + auto-advance: al completar una sopa via `onComplete`, avanza tras 1.5s
+
 ### Modo online (drag-to-select)
 - El jugador hace clic en una celda, arrastra en linea recta (horizontal/vertical/diagonal) y suelta para validar la palabra
 - Las palabras encontradas se marcan en verde
@@ -244,7 +251,7 @@ Los datos generados persisten en memoria al navegar entre paginas (Generator →
 ### Libreria: @react-pdf/renderer
 - Componentes: `<Document>`, `<Page>`, `<View>`, `<Text>`, `<StyleSheet>`
 - Tamano de pagina: LETTER (612 x 792 pt)
-- Fuente: Helvetica
+- Fuente: Helvetica (built-in, sin registro externo para evitar fallos de red)
 
 ### Flujo de descarga
 1. Se construye el arbol JSX del documento (`GamePDFDocument > <Game>PDF`)
@@ -253,8 +260,16 @@ Los datos generados persisten en memoria al navegar entre paginas (Generator →
 
 ### Flujo de impresion
 1. Mismo proceso hasta obtener el Blob
-2. Se carga en un iframe oculto
-3. Se llama a `iframe.contentWindow.print()`
+2. Se abre el PDF en una pestana nueva con `window.open(url, '_blank')`
+3. El usuario imprime desde el visor nativo del navegador
+4. Si el popup es bloqueado, se descarga como fallback
+
+### PDF de Sopa de Letras (`WordSearchPDF.tsx`)
+- **Encabezado:** Titulo + subtitulo con tematica (si aplica), dificultad y cantidad de palabras
+- **Instrucciones:** Texto en cursiva negrita indicando direcciones de busqueda segun dificultad
+- **Grilla:** Letras en Helvetica bold con fondo #fafafa y bordes #ccc
+- **Footer:** Lista de palabras a buscar
+- **Multi-pagina:** PrintPreview genera un `<Document>` con multiples `<Page>` cuando hay varias sopas
 
 ### Lazy loading
 Los componentes PDF se cargan dinamicamente con `getPDFComponent(gameId)` que usa `import()`.
@@ -339,6 +354,39 @@ Convencion de mensajes:
 | `/play/:game` | PlayOnline | Juego interactivo online |
 
 Las rutas `/print` y `/play` estan lazy-loaded con `React.lazy()`.
+
+---
+
+---
+
+## Deploy (GitHub Pages)
+
+### Automático (GitHub Actions)
+El archivo `.github/workflows/deploy.yml` despliega automaticamente al hacer push a `main`:
+1. `actions/checkout@v4` — clona el repo
+2. `actions/setup-node@v4` — instala Node 22
+3. `npm ci` — instala dependencias
+4. `npm run build` — compila con `tsc -b && vite build`
+5. `actions/upload-pages-artifact@v3` — sube `dist/`
+6. `actions/deploy-pages@v4` — despliega a GitHub Pages
+
+### Configuracion necesaria en GitHub
+1. Repo → Settings → Pages → Source: **GitHub Actions**
+2. Environment `github-pages` creado automaticamente por `actions/deploy-pages`
+
+### Build local
+```bash
+npm run build    # Produce dist/
+npx vite preview # Sirve localmente el build
+```
+
+### Vite base path
+En `vite.config.ts`, `base` se ajusta automaticamente:
+- Local (`process.env.GITHUB_ACTIONS` no definido): `base: "/"`
+- GitHub Actions: `base: "/Generador-de-juegos-para-imprimir/"`
+
+### React Router basename
+En `src/main.tsx`, el `BrowserRouter` usa `import.meta.env.BASE_URL` como `basename`, que coincide con el `base` de Vite.
 
 ---
 
