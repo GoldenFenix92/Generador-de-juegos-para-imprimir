@@ -1,12 +1,22 @@
-import { View, Text, StyleSheet } from "@react-pdf/renderer";
+import { View, Text, StyleSheet, Font } from "@react-pdf/renderer";
 import type { WordSearchConfig, WordSearchOutput } from "./types";
 
-// Letter: 612 × 792 pt | Margen 1 cm ≈ 28 pt
+Font.register({
+  family: "Montserrat",
+  fonts: [
+    { src: "https://cdn.jsdelivr.net/gh/JulietaUla/Montserrat@master/fonts/ttf/Montserrat-Regular.ttf", fontWeight: 400 },
+    { src: "https://cdn.jsdelivr.net/gh/JulietaUla/Montserrat@master/fonts/ttf/Montserrat-Medium.ttf", fontWeight: 500 },
+    { src: "https://cdn.jsdelivr.net/gh/JulietaUla/Montserrat@master/fonts/ttf/Montserrat-SemiBold.ttf", fontWeight: 600 },
+    { src: "https://cdn.jsdelivr.net/gh/JulietaUla/Montserrat@master/fonts/ttf/Montserrat-Bold.ttf", fontWeight: 700 },
+  ],
+});
+
 const MARGIN = 28;
 const W = 612 - MARGIN * 2;
 const H = 792 - MARGIN * 2;
-const H10 = H * 0.10;
 const H80 = H * 0.80;
+const H6 = H * 0.06;
+const H4 = H * 0.04;
 
 function getGridSize(wc: number): number {
   if (wc <= 5) return 10;
@@ -22,15 +32,41 @@ function calcCell(g: number): { px: number; fs: number } {
   return { px: cell, fs };
 }
 
+const DIRECTION_LABELS: Record<string, string> = {
+  easy: "Las palabras pueden estar en estas direcciones: derecha (→) y abajo (↓).",
+  medium: "Las palabras pueden estar en estas direcciones: derecha (→), abajo (↓) y diagonal (↘).",
+  hard: "Las palabras pueden estar en estas direcciones: derecha, abajo, diagonal y sus reversas (←, ↑, ↖, ↙).",
+  expert: "Las palabras pueden estar en todas las direcciones posibles, incluyendo palabras concatenadas entre si.",
+};
+
+const LABEL: Record<string, string> = {
+  easy: "Facil",
+  medium: "Medio",
+  hard: "Dificil",
+  expert: "Experto",
+};
+
 const styles = StyleSheet.create({
-  page: { padding: MARGIN, fontFamily: "Helvetica" },
+  page: { padding: MARGIN, fontFamily: "Montserrat" },
   header: {
-    height: H10,
+    height: H6,
     justifyContent: "center",
     alignItems: "center",
   },
-  title: { fontSize: 18, fontWeight: "bold" },
-  subtitle: { fontSize: 10, marginTop: 2, color: "#555" },
+  title: { fontSize: 16, fontWeight: 700, letterSpacing: 1 },
+  subtitle: { fontSize: 9, marginTop: 1, color: "#666", fontWeight: 400 },
+  instructions: {
+    height: H4,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
+  instrText: {
+    fontSize: 7.5,
+    color: "#888",
+    fontWeight: 400,
+    textAlign: "center",
+  },
   body: {
     height: H80,
     justifyContent: "center",
@@ -40,35 +76,29 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row" },
   cell: {
     textAlign: "center",
-    fontFamily: "Courier",
-    fontWeight: "bold",
+    fontFamily: "Montserrat",
+    fontWeight: 600,
     borderWidth: 0.5,
-    borderColor: "#bbb",
+    borderColor: "#ccc",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#fafafa",
   },
   footer: {
-    height: H10,
+    height: H - H80 - H6 - H4,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 10,
   },
   list: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center" },
-  word: { fontSize: 8, marginHorizontal: 4, marginBottom: 1 },
+  word: { fontSize: 8, marginHorizontal: 4, marginBottom: 2, color: "#333", fontWeight: 500 },
 });
 
 interface Props {
   data: WordSearchOutput;
   config: WordSearchConfig;
 }
-
-const LABEL: Record<string, string> = {
-  easy: "Fácil",
-  medium: "Medio",
-  hard: "Difícil",
-  expert: "Experto",
-};
 
 export default function WordSearchPDF({ data, config }: Props) {
   const g = getGridSize(config.wordCount);
@@ -79,7 +109,13 @@ export default function WordSearchPDF({ data, config }: Props) {
       <View style={styles.header}>
         <Text style={styles.title}>Sopa de Letras</Text>
         <Text style={styles.subtitle}>
-          Dificultad: {LABEL[config.difficulty] ?? "Fácil"} · {data.words.length} palabras
+          Dificultad: {LABEL[config.difficulty] ?? "Facil"} · {data.words.length} palabras
+        </Text>
+      </View>
+
+      <View style={styles.instructions}>
+        <Text style={styles.instrText}>
+          {DIRECTION_LABELS[config.difficulty] ?? DIRECTION_LABELS.easy}
         </Text>
       </View>
 
