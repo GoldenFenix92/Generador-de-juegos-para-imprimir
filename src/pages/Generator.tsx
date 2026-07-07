@@ -160,6 +160,7 @@ export default function Generator() {
   const configsMatch = storedData && JSON.stringify(storedData.config) === JSON.stringify(config);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(configsMatch ? storedData.output : null);
+  const [sheetPage, setSheetPage] = useState(0);
 
   function patch(p: Record<string, unknown>) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -178,6 +179,7 @@ export default function Generator() {
       ? Array.from({ length: count }, () => definition.generate(config))
       : definition.generate(config);
     setData(newData);
+    setSheetPage(0);
     setGeneratedData(gameId, config, newData);
   }
 
@@ -361,13 +363,39 @@ export default function Generator() {
 
       {data && (
         <>
-          {Array.isArray(data) && (
-            <p className="text-sm mb-2" style={{ color: "var(--text-muted)" }}>
-              Sopa 1 de {data.length}
-            </p>
+          {Array.isArray(data) && data.length > 1 && (
+            <div className="glass-card mb-4 p-3 flex items-center justify-center gap-4">
+              <button
+                type="button"
+                disabled={sheetPage === 0}
+                onClick={() => setSheetPage((p) => p - 1)}
+                className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-all disabled:opacity-30 hover:bg-white/10"
+                style={{ color: "var(--text-primary)" }}
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                Anterior
+              </button>
+              <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>
+                Sopa {sheetPage + 1} de {data.length}
+              </span>
+              <button
+                type="button"
+                disabled={sheetPage === data.length - 1}
+                onClick={() => setSheetPage((p) => p + 1)}
+                className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-all disabled:opacity-30 hover:bg-white/10"
+                style={{ color: "var(--text-primary)" }}
+              >
+                Siguiente
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
           )}
           <definition.Preview
-            data={Array.isArray(data) ? (data[0] as any) : (data as any)}
+            data={Array.isArray(data) ? (data[sheetPage] as any) : (data as any)}
             config={previewConfig as any}
           />
         </>
