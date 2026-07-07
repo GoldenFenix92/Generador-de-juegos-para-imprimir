@@ -124,9 +124,10 @@ export default function PrintPreview() {
       </Button>
       <h1 className="mb-6 text-2xl font-bold text-primary">Vista previa - {label}</h1>
 
-      <div className="glass-card mb-6 p-4 flex gap-3 flex-wrap items-center">
+      <div className="glass-card mb-6 p-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
         <Button
           variant="primary"
+          className="w-full sm:w-auto"
           slideIcon={
             <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2v-7a2 2 0 012-2h10a2 2 0 012 2v7a2 2 0 01-2 2z" />
@@ -139,6 +140,7 @@ export default function PrintPreview() {
         </Button>
         <Button
           variant="secondary"
+          className="w-full sm:w-auto"
           slideIcon={
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />

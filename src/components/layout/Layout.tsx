@@ -78,7 +78,7 @@ function ThemeToggle() {
   return (
     <button
       onClick={() => setDark((d) => !d)}
-      className="relative w-[56px] h-[28px] rounded-full transition-all duration-300"
+      className="relative w-[56px] h-[28px] rounded-full transition-all duration-300 shrink-0"
       style={{
         background: dark
           ? "linear-gradient(135deg, #1e293b, #334155)"
@@ -121,6 +121,7 @@ function AmbientBlobs() {
 
 function Navbar() {
   const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header
@@ -131,12 +132,12 @@ function Navbar() {
         borderColor: "var(--card-border)",
       }}
     >
-      <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 py-2">
+      <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 sm:px-6 py-2">
         <Link to="/" className="text-base font-bold shrink-0" style={{ fontFamily: "var(--font-heading)", color: "var(--text-primary)" }}>
           Generador de Juegos
         </Link>
 
-        <ul className="flex items-center gap-3">
+        <ul className="hidden sm:flex items-center gap-2 lg:gap-3">
           {navItems.map((item) => {
             const isActive = location.pathname === item.to;
             const gFrom = item.gradientFrom;
@@ -146,7 +147,7 @@ function Navbar() {
               <li key={item.to}>
                 <Link
                   to={item.to}
-                  className="relative w-[46px] h-[46px] rounded-full flex items-center justify-center transition-all duration-500 hover:w-[120px] group cursor-pointer no-underline"
+                  className="relative w-[42px] h-[42px] lg:w-[46px] lg:h-[46px] rounded-full flex items-center justify-center transition-all duration-500 hover:w-[100px] lg:hover:w-[120px] group cursor-pointer no-underline"
                   style={{
                     background: isActive
                       ? `linear-gradient(135deg, ${gFrom}, ${gTo})`
@@ -178,7 +179,7 @@ function Navbar() {
                   </span>
 
                   <span
-                    className="absolute text-white uppercase tracking-wide text-[11px] font-semibold transition-all duration-500 scale-0 group-hover:scale-100 delay-100 whitespace-nowrap"
+                    className="absolute text-white uppercase tracking-wide text-[10px] lg:text-[11px] font-semibold transition-all duration-500 scale-0 group-hover:scale-100 delay-100 whitespace-nowrap"
                     style={{ zIndex: 10 }}
                   >
                     {item.label}
@@ -189,8 +190,63 @@ function Navbar() {
           })}
         </ul>
 
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="sm:hidden p-2 rounded-lg transition-all hover:bg-white/10"
+            onClick={() => setMenuOpen((o) => !o)}
+            style={{ color: "var(--text-primary)" }}
+            aria-label={menuOpen ? "Cerrar menu" : "Abrir menu"}
+          >
+            {menuOpen ? (
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+          <ThemeToggle />
+        </div>
       </nav>
+
+      {menuOpen && (
+        <div
+          className="sm:hidden border-t px-4 py-3 pb-4 space-y-2"
+          style={{
+            background: "var(--card-bg)",
+            backdropFilter: "blur(24px)",
+            borderColor: "var(--card-border)",
+          }}
+        >
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.to;
+
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-4 py-3 transition-all"
+                style={{
+                  background: isActive
+                    ? `linear-gradient(135deg, ${item.gradientFrom}20, ${item.gradientTo}20)`
+                    : "transparent",
+                  color: isActive ? item.gradientFrom : "var(--text-primary)",
+                  border: isActive ? `0.5px solid ${item.gradientFrom}40` : "0.5px solid transparent",
+                }}
+              >
+                <span style={{ color: isActive ? item.gradientFrom : "var(--accent)" }}>
+                  {item.icon}
+                </span>
+                <span className="text-sm font-semibold">{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </header>
   );
 }
@@ -200,9 +256,9 @@ export default function Layout({ children }: { children: ReactNode }) {
     <div className="min-h-screen flex flex-col relative">
       <AmbientBlobs />
       <Navbar />
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">{children}</main>
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 sm:px-6 py-6 sm:py-8">{children}</main>
       <footer
-        className="border-t px-6 py-4 text-center text-sm"
+        className="border-t px-4 sm:px-6 py-4 text-center text-sm"
         style={{
           background: "var(--card-bg)",
           backdropFilter: "blur(24px)",
