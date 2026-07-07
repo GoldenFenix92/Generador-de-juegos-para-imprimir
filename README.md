@@ -41,6 +41,8 @@ Aplicacion web para generar, personalizar y descargar juegos educativos en PDF l
 
 ## Funcionalidades destacadas (Sopa de Letras)
 
+- **Diseno responsive:** Navbar con hamburger menu en mobile, grillas adaptables, layout fluido
+- **Touch support:** Modo online funciona con dedo (touchstart/touchmove/touchend) — sombreado en vivo de palabras
 - **Generacion masiva:** hasta 10 sopas en un solo clic
 - **Paginacion:** navega entre sopas en Generator, PrintPreview y PlayOnline
 - **Auto-avance:** al completar una sopa en modo online, avanza automaticamente a la siguiente

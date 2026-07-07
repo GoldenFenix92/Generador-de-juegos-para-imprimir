@@ -171,9 +171,19 @@ No se usan `@media (prefers-color-scheme)` ni variantes `dark:` de Tailwind; el 
 
 Barra superior centrada con 5 items: Inicio, Sopa, Sudoku, Laberinto, Tres Raya.
 
-Cada item comienza como un circulo de 48px con icono SVG. Al hacer hover, se expande a 120px (`hover:w-[120px]`) con `transition-all duration-500` y muestra el nombre del juego. El hover incluye un gradient indigo-rose.
+Cada item comienza como un circulo de 42-46px con icono SVG. Al hacer hover, se expande a 100-120px (`hover:w-[100px] lg:hover:w-[120px]`) con `transition-all duration-500` y muestra el nombre del juego. El hover incluye un gradient indigo-rose.
 
-Los links se implementan con `<NavLink>` de React Router para resaltar el item activo con `activeClass` de Tailwind.
+**Mobile (< 640px):** Se muestra un hamburger menu (icono ☰/✕) que despliega un menu vertical con todos los items como links con icono + label, gradient de fondo al activo. Los links de navegacion tradicionales se ocultan con `hidden sm:flex`.
+
+Los links se implementan con `<Link>` de React Router para resaltar el item activo con gradient de fondo.
+
+### Layout responsive
+
+El contenedor principal (`Layout.tsx`) usa `max-w-5xl` con padding responsive:
+- Mobile: `px-4 py-6`
+- Tablet+: `sm:px-6 sm:py-8`
+
+El header y footer tambien usan `px-4 sm:px-6`.
 
 ---
 
@@ -227,6 +237,29 @@ Selector colapsable con 4 niveles: Facil, Medio, Dificil, Experto.
 - Las palabras encontradas se marcan en verde
 - Cuando se encuentran todas, se muestra mensaje de felicitaciones
 - El puzzle se genera fresh en cada carga (anti-trampas)
+
+### Responsive grid (useResponsiveCell)
+En `WordSearch.tsx`, el hook `useResponsiveCell(cols, maxCell=36)`:
+- Mide el contenedor via `ResizeObserver`
+- Calcula `cellPx = floor((containerWidth - padding - gaps) / cols)`, clamp entre 16px y maxCell
+- El font-size escala proporcionalmente: `14px` (≥32px), `12px` (≥24px), `11px` (≥18px), `10px` (<18px)
+
+El glass-card usa `w-full sm:w-fit`:
+- Mobile: ocupa el ancho disponible → celdas se achican para evitar overflow
+- Tablet+: shrink-wrap alrededor del grid → centrado por `items-center` del flex parent
+
+### Touch events (seleccion en mobile)
+OnlineGrid maneja eventos touch ademas de mouse:
+- `onTouchStart` en cada celda → inicia seleccion (como `mousedown`)
+- `onTouchMove` en cada celda → usa `document.elementFromPoint(touch.clientX, touch.clientY)` para detectar la celda bajo el dedo y sombrea en amarillo (como `mouseenter`)
+- `touchend` global (via `document.addEventListener`) → valida la palabra (como `mouseup`)
+- `touch-none` (CSS `touch-action: none`) en el grid para prevenir scroll durante seleccion
+- Sin `preventDefault()` redundante (eventos touch son pasivos por defecto)
+
+### Sudoku, Maze, TicTacToe — overflow safety
+- Sudoku: `overflow-x-auto`, celdas `h-8 w-8 sm:h-9 sm:w-9`
+- Maze: `overflow-x-auto`, celdas 18px inline
+- TicTacToe: `overflow-x-auto`, celdas `h-16 w-16 sm:h-20 sm:w-20`
 
 ---
 
@@ -285,16 +318,24 @@ Directorio: `.opencode/skills/`
 | `algorithm-patterns` | Patrones de algoritmos para generacion de juegos imprimibles |
 | `game-definition` | Interfaz GameDefinition para definir juegos |
 | `react-pdf-builder` | Guia de uso de @react-pdf/renderer para PDFs vectoriales |
-| `ui-ux-pro-max` | Sistema de diseno premium con glassmorphism, paletas, tipografia y micro-interacciones |
 | `customize-opencode` | Configuracion del asistente opencode |
-| `brand` | Voz de marca, identidad visual, guias de estilo |
-| `design` | Diseno integral: identidad corporativa, logotipos, banners, iconos |
-| `design-system` | Arquitectura de tokens, especificaciones de componentes |
-| `slides` | Creacion de presentaciones HTML con Chart.js |
-| `ui-styling` | Creacion de interfaces de usuario accesibles |
-| `banner-design` | Diseno de banners para redes sociales, ads, web y print |
 
 Los skills se cargan automaticamente segun el contexto de la conversacion con la IA.
+
+### Analisis: .opencode en el repositorio
+
+El directorio `.opencode/` contiene la configuracion de la herramienta opencode (skills, node_modules, package.json). Se rastrea en git porque:
+
+**A favor de mantenerlo:**
+- Skills como `game-definition`, `react-pdf-builder` y `algorithm-patterns` son especificos del proyecto y mejoran la asistencia de la IA
+- Cualquier desarrollador que use opencode obtiene el mismo contexto
+- `node_modules/` esta ignorado por el `.gitignore` raiz (solo se trackean archivos ligeros: markdown, JSON, scripts)
+
+**En contra:**
+- Skills genericos (ui-ux-pro-max, design, brand, banner-design, design-system, slides, ui-styling) no son especificos del proyecto — agregan ~60 archivos de ruido
+- Es dependiente de una herramienta externa (opencode)
+
+**Recomendacion:** Mantener `.opencode/` en el repo pero eliminar los skills genericos de diseno, dejando solo los esenciales del proyecto: `game-definition`, `react-pdf-builder`, `algorithm-patterns` y `customize-opencode`.
 
 ---
 
