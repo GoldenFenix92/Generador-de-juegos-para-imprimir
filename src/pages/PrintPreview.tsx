@@ -64,16 +64,28 @@ export default function PrintPreview() {
     return null;
   }
 
+  const [printError, setPrintError] = useState<string | null>(null);
+
   async function handleDownload() {
+    setPrintError(null);
     const doc = buildDoc();
     if (!doc) return;
-    await downloadPDF(doc, `${gameId}.pdf`);
+    try {
+      await downloadPDF(doc, `${gameId}.pdf`);
+    } catch {
+      setPrintError("Error al generar el PDF. Intenta de nuevo.");
+    }
   }
 
   async function handlePrint() {
+    setPrintError(null);
     const doc = buildDoc();
     if (!doc) return;
-    await printPDF(doc);
+    try {
+      await printPDF(doc);
+    } catch {
+      setPrintError("Error al generar el PDF para impresion. Intenta de nuevo.");
+    }
   }
 
   if (!definition) {
@@ -138,6 +150,12 @@ export default function PrintPreview() {
           Imprimir
         </Button>
       </div>
+
+      {printError && (
+        <p className="mb-4 text-sm font-medium" style={{ color: "#EC4899" }}>
+          {printError}
+        </p>
+      )} 
 
       {totalPages > 1 && (
         <div className="glass-card mb-4 p-3 flex items-center justify-center gap-4">
