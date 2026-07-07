@@ -8,8 +8,8 @@
   --color-accent-glow: rgba(99, 102, 241, 0.35);
   --color-secondary: #2DD4BF;
   --color-warm: #EC4899;
-  --font-heading: Inter, system-ui, sans-serif;
-  --font-body: Inter, system-ui, sans-serif;
+  --font-heading: Montserrat, system-ui, sans-serif;
+  --font-body: Montserrat, system-ui, sans-serif;
 }
 
 @utility glass-card {
@@ -100,6 +100,14 @@
   box-shadow: 0 0 30px var(--accent-glow);
 }
 
+@utility glow-secondary {
+  box-shadow: 0 0 30px var(--secondary-glow);
+}
+
+@utility glow-rose {
+  box-shadow: 0 0 30px var(--rose-glow);
+}
+
 @keyframes blob-drift {
   0%, 100% { transform: translate(0, 0) scale(1); }
   25% { transform: translate(35px, -25px) scale(1.05); }
@@ -142,6 +150,8 @@
   --accent: #6366F1;
   --accent-hover: #4F46E5;
   --accent-glow: rgba(99, 102, 241, 0.18);
+  --secondary-glow: rgba(45, 212, 191, 0.18);
+  --rose-glow: rgba(244, 114, 182, 0.2);
   --blob-1: #818CF8;
   --blob-2: #2DD4BF;
   --blob-3: #F472B6;
@@ -166,6 +176,8 @@
   --accent: #818CF8;
   --accent-hover: #A5B4FC;
   --accent-glow: rgba(129, 140, 248, 0.2);
+  --secondary-glow: rgba(45, 212, 191, 0.18);
+  --rose-glow: rgba(236, 72, 153, 0.2);
   --blob-1: #6366F1;
   --blob-2: #2DD4BF;
   --blob-3: #EC4899;
