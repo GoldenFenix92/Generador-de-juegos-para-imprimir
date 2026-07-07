@@ -1,7 +1,8 @@
 import { useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getGameDefinition } from "../lib/gameRegistry";
 import type { GameId } from "../lib/gameRegistry";
+import { Button } from "../components/ui/Button";
 import { useGeneratorStore } from "../store/generator";
 
 const GAME_LABELS: Record<string, string> = {
@@ -11,7 +12,14 @@ const GAME_LABELS: Record<string, string> = {
   tictactoe: "Tres en Raya",
 };
 
+const slideArrow = (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+  </svg>
+);
+
 export default function PlayOnline() {
+  const navigate = useNavigate();
   const { game: gameParam } = useParams<{ game: string }>();
   const gameId = gameParam as GameId;
   const definition = getGameDefinition(gameId);
@@ -27,9 +35,9 @@ export default function PlayOnline() {
   if (!definition || !config || !data) {
     return (
       <div>
-        <Link to="/" className="mb-4 inline-block text-sm hover:underline text-accent">
-          &larr; Volver
-        </Link>
+        <Button variant="tertiary" slideIcon={slideArrow} onClick={() => navigate("/")}>
+          Volver
+        </Button>
         <h1 className="mb-6 text-2xl font-bold text-primary">Juego no encontrado</h1>
         <p className="text-muted">El juego solicitado no esta disponible.</p>
       </div>
@@ -38,9 +46,9 @@ export default function PlayOnline() {
 
   return (
     <div>
-      <Link to={`/generator/${gameId}`} className="mb-4 inline-block text-sm hover:underline text-accent">
-        &larr; Volver
-      </Link>
+      <Button variant="tertiary" slideIcon={slideArrow} className="mb-4" onClick={() => navigate(`/generator/${gameId}`)}>
+        Volver
+      </Button>
       <h1 className="mb-6 text-2xl font-bold text-primary">{label} — Jugar online</h1>
 
       <definition.Preview data={data as any} config={{ ...config, showSolution: false } as any} />

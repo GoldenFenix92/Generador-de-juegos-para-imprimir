@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getGameDefinition, getPDFComponent } from "../lib/gameRegistry";
 import type { GameId } from "../lib/gameRegistry";
 import { Button } from "../components/ui/Button";
@@ -15,6 +15,7 @@ const GAME_LABELS: Record<string, string> = {
 };
 
 export default function PrintPreview() {
+  const navigate = useNavigate();
   const { game: gameParam } = useParams<{ game: string }>();
   const gameId = gameParam as GameId;
   const definition = getGameDefinition(gameId);
@@ -54,9 +55,17 @@ export default function PrintPreview() {
   if (!definition) {
     return (
       <div>
-        <Link to="/" className="mb-4 inline-block text-sm hover:underline text-accent">
-          &larr; Volver
-        </Link>
+        <Button
+          variant="tertiary"
+          slideIcon={
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          }
+          onClick={() => navigate("/")}
+        >
+          Volver
+        </Button>
         <h1 className="mb-6 text-2xl font-bold text-primary">Juego no encontrado</h1>
         <p className="text-muted">El juego solicitado no esta disponible.</p>
       </div>
@@ -65,14 +74,45 @@ export default function PrintPreview() {
 
   return (
     <div>
-      <Link to={`/generator/${gameId}`} className="mb-4 inline-block text-sm hover:underline text-accent">
-        &larr; Volver
-      </Link>
+      <Button
+        variant="tertiary"
+        className="mb-4"
+        slideIcon={
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        }
+        onClick={() => navigate(`/generator/${gameId}`)}
+      >
+        Volver
+      </Button>
       <h1 className="mb-6 text-2xl font-bold text-primary">Vista previa - {label}</h1>
 
       <div className="glass-card mb-6 p-4 flex gap-3 w-fit">
-        <Button onClick={handleDownload} disabled={!PDFComponent}>Descargar PDF</Button>
-        <Button onClick={handlePrint} disabled={!PDFComponent}>Imprimir</Button>
+        <Button
+          variant="primary"
+          slideIcon={
+            <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2v-7a2 2 0 012-2h10a2 2 0 012 2v7a2 2 0 01-2 2z" />
+            </svg>
+          }
+          onClick={handleDownload}
+          disabled={!PDFComponent}
+        >
+          Descargar PDF
+        </Button>
+        <Button
+          variant="secondary"
+          slideIcon={
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+          }
+          onClick={handlePrint}
+          disabled={!PDFComponent}
+        >
+          Imprimir
+        </Button>
       </div>
 
       {data && config && <definition.Preview data={data as any} config={config as any} />}
