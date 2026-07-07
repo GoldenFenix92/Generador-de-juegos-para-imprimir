@@ -46,6 +46,21 @@ const LABEL: Record<string, string> = {
   expert: "Experto",
 };
 
+const THEME_LABELS: Record<string, string> = {
+  naturaleza: "Naturaleza",
+  autos: "Autos",
+  valores: "Valores",
+  animales: "Animales",
+  colores: "Colores",
+  comida: "Comida",
+  deportes: "Deportes",
+  profesiones: "Profesiones",
+  musica: "Musica",
+  viajes: "Viajes",
+  casa: "Casa",
+  ropa: "Ropa",
+};
+
 const styles = StyleSheet.create({
   page: { padding: MARGIN, fontFamily: "Montserrat" },
   header: {
@@ -110,6 +125,11 @@ export default function WordSearchPDF({ data, config }: Props) {
       <View style={styles.header}>
         <Text style={styles.title}>Sopa de Letras</Text>
         <Text style={styles.subtitle}>
+          {config.generationMode === "themed" && config.theme
+            ? `Tematica: ${THEME_LABELS[config.theme] ?? config.theme} · `
+            : config.generationMode === "custom"
+              ? "Personalizado · "
+              : ""}
           Dificultad: {LABEL[config.difficulty] ?? "Facil"} · {data.words.length} palabras
         </Text>
       </View>
