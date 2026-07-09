@@ -1,6 +1,10 @@
+import type { Difficulty } from "../../../types/games";
+
 export interface SudokuConfig {
   size: number;
-  difficulty: "easy" | "medium" | "hard";
+  difficulty: Difficulty;
+  sheetCount?: number;
+  showSolutionInPDF?: boolean;
 }
 
 export interface SudokuOutput {

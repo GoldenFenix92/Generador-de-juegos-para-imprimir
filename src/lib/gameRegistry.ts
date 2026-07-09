@@ -4,9 +4,16 @@ import sudokuGame from "../components/games/sudoku";
 import mazeGame from "../components/games/maze";
 import tictactoeGame from "../components/games/tictactoe";
 
+export interface PDFModule<TOutput, TConfig extends GameConfig> {
+  default: React.FC<{ data: TOutput; config: TConfig }>;
+  SolutionPDF?: React.FC<{ data: TOutput; config: TConfig }>;
+}
+
+type PDFLoader<TOutput, TConfig extends GameConfig> = () => Promise<PDFModule<TOutput, TConfig>>;
+
 interface GameEntry<TOutput, TConfig extends GameConfig> {
   definition: GameDefinition<TOutput, TConfig>;
-  loadPDF: () => Promise<{ default: React.FC<{ data: TOutput; config: TConfig }> }>;
+  loadPDF: PDFLoader<TOutput, TConfig>;
 }
 
 const gameEntries: Record<GameId, GameEntry<any, any>> = {

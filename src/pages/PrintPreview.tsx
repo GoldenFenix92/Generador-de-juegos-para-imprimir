@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Document, Page, StyleSheet } from "@react-pdf/renderer";
 import { getGameDefinition, getPDFComponent } from "../lib/gameRegistry";
-import type { GameId } from "../lib/gameRegistry";
+import type { GameId, PDFModule } from "../lib/gameRegistry";
 import { Button } from "../components/ui/Button";
 import { downloadPDF, printPDF } from "../lib/print";
 import { GamePDFDocument } from "../components/pdf/PDFDocument";
@@ -27,40 +27,70 @@ export default function PrintPreview() {
   const label = GAME_LABELS[gameId] ?? "Juego";
   const stored = useGeneratorStore((s) => s.data[gameId]);
 
-  const [PDFComponent, setPDFComponent] = useState<React.FC<any> | null>(null);
-  const [page, setPage] = useState(0);
+  const [pdfModule, setPDFModule] = useState<PDFModule<any, any> | null>(null);
 
   useEffect(() => {
-    getPDFComponent(gameId).then((mod) => setPDFComponent(() => mod.default));
+    getPDFComponent(gameId).then((mod) => setPDFModule(mod));
   }, [gameId]);
 
   const rawData = stored?.output ?? null;
   const config = stored?.config ?? definition?.defaultConfig;
 
-  const dataArray = Array.isArray(rawData) ? rawData : (rawData ? [rawData] : []);
+  const dataArray: any[] = useMemo(
+    () => (Array.isArray(rawData) ? rawData : rawData ? [rawData] : []),
+    [rawData],
+  );
+
+  const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    if (page >= dataArray.length && dataArray.length > 0) {
+      setPage(0);
+    }
+  }, [page, dataArray.length]);
+
   const totalPages = dataArray.length;
   const currentData = dataArray[page] ?? null;
 
+  const PreviewComp = definition?.Preview;
+
   function buildDoc() {
-    if (!config || !PDFComponent) return null;
-    if (dataArray.length > 1) {
+    if (!config || !pdfModule?.default) return null;
+
+    const showSolution = config.showSolutionInPDF ?? false;
+
+    // Collect all PDF pages: puzzle pages + optional solution pages
+    const pdfPages: { Component: React.FC<any>; data: any }[] = [];
+
+    for (const d of dataArray) {
+      pdfPages.push({ Component: pdfModule.default, data: d });
+      if (showSolution && pdfModule.SolutionPDF) {
+        pdfPages.push({ Component: pdfModule.SolutionPDF, data: d });
+      }
+    }
+
+    if (pdfPages.length > 1) {
       return (
         <Document>
-          {dataArray.map((d, i) => (
+          {pdfPages.map((p, i) => (
             <Page key={i} size="LETTER" style={pdfStyles.page}>
-              <PDFComponent data={d} config={config} />
+              <p.Component data={p.data} config={config} />
             </Page>
           ))}
         </Document>
       );
     }
-    if (currentData) {
+
+    if (pdfPages.length === 1) {
+      const SingleComp = pdfPages[0].Component;
+      const singleData = pdfPages[0].data;
       return (
         <GamePDFDocument>
-          <PDFComponent data={currentData} config={config} />
+          <SingleComp data={singleData} config={config} />
         </GamePDFDocument>
       );
     }
+
     return null;
   }
 
@@ -134,7 +164,7 @@ export default function PrintPreview() {
             </svg>
           }
           onClick={handleDownload}
-          disabled={!PDFComponent}
+          disabled={!pdfModule?.default}
         >
           Descargar PDF
         </Button>
@@ -147,7 +177,7 @@ export default function PrintPreview() {
             </svg>
           }
           onClick={handlePrint}
-          disabled={!PDFComponent}
+          disabled={!pdfModule?.default}
         >
           Imprimir
         </Button>
@@ -157,7 +187,7 @@ export default function PrintPreview() {
         <p className="mb-4 text-sm font-medium" style={{ color: "#EC4899" }}>
           {printError}
         </p>
-      )} 
+      )}
 
       {totalPages > 1 && (
         <div className="glass-card mb-4 p-3 flex items-center justify-center gap-4">
@@ -174,7 +204,7 @@ export default function PrintPreview() {
             Anterior
           </button>
           <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>
-            Sopa {page + 1} de {totalPages}
+            Pagina {page + 1} de {totalPages}
           </span>
           <button
             type="button"
@@ -191,7 +221,9 @@ export default function PrintPreview() {
         </div>
       )}
 
-      {currentData && config && <definition.Preview data={currentData as any} config={config as any} />}
+      {currentData && config && PreviewComp && (
+        <PreviewComp data={currentData} config={config} />
+      )}
     </div>
   );
 }

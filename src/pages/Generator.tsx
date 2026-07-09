@@ -17,6 +17,13 @@ const GAME_LABELS: Record<string, string> = {
   tictactoe: "Tres en Raya",
 };
 
+const SHEET_LABELS: Record<string, string> = {
+  wordsearch: "sopa",
+  sudoku: "sudoku",
+  maze: "laberinto",
+  tictactoe: "tablero",
+};
+
 const WORD_COUNT_OPTIONS = [5, 10, 15, 20];
 
 interface WSConfig extends GameConfig {
@@ -26,6 +33,7 @@ interface WSConfig extends GameConfig {
   theme?: ThemeId;
   customWords?: string[];
   sheetCount: number;
+  showSolutionInPDF?: boolean;
 }
 
 function WordSearchOptions({
@@ -146,6 +154,7 @@ export default function Generator() {
   const gameId = gameParam as GameId;
   const definition = getGameDefinition(gameId);
   const label = GAME_LABELS[gameId] ?? "Juego";
+  const sheetLabel = SHEET_LABELS[gameId] ?? "pagina";
 
   const storedData = useGeneratorStore((s) => s.data[gameId]);
   const setCurrentConfig = useGeneratorStore((s) => s.setCurrentConfig);
@@ -175,7 +184,7 @@ export default function Generator() {
     if (!definition) return;
     setCurrentConfig(gameId, config);
     const count = config.sheetCount ?? 1;
-    const newData = isWordSearch && count > 1
+    const newData = count > 1
       ? Array.from({ length: count }, () => definition.generate(config))
       : definition.generate(config);
     setData(newData);
@@ -189,7 +198,7 @@ export default function Generator() {
   }
 
   const isWordSearch = gameId === "wordsearch";
-  const previewConfig = isWordSearch ? { ...config, showSolution: true } : config;
+  const previewConfig = { ...config, showSolution: true };
 
   if (!definition) {
     return (
@@ -305,6 +314,46 @@ export default function Generator() {
           />
         )}
 
+        {!isWordSearch && (
+          <>
+            <div>
+              <label className="mb-1 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>Cantidad de {sheetLabel}s</label>
+              <Select
+                value={String(config.sheetCount ?? 1)}
+                onChange={(e) => patch({ sheetCount: Number(e.target.value) })}
+              >
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={n}>{n} {sheetLabel}{n > 1 ? "s" : ""}</option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>Modo</label>
+              <Select
+                value={config.mode ?? "print"}
+                onChange={(e) => patch({ mode: e.target.value })}
+              >
+                <option value="print">Para imprimir</option>
+                <option value="online">Jugar online</option>
+              </Select>
+            </div>
+          </>
+        )}
+
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={config.showSolutionInPDF ?? false}
+              onChange={(e) => patch({ showSolutionInPDF: e.target.checked })}
+              className="h-4 w-4 rounded accent-purple-600"
+            />
+            <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+              Incluir solucion en PDF
+            </span>
+          </label>
+        </div>
+
         <div className="flex flex-wrap items-end gap-3 w-full sm:w-auto mt-2 sm:mt-0">
           {data && (
             <Button
@@ -331,10 +380,10 @@ export default function Generator() {
             }
             onClick={regenerate}
           >
-            Generar nueva Sopa de Letras
+            Generar {label}
           </Button>
 
-          {isWordSearch && config.mode === "online" ? (
+          {(config.mode ?? "print") === "online" ? (
             <Button
               variant="secondary"
               className="w-full sm:w-auto"
@@ -382,7 +431,7 @@ export default function Generator() {
                 Anterior
               </button>
               <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>
-                Sopa {sheetPage + 1} de {data.length}
+                {sheetLabel} {sheetPage + 1} de {data.length}
               </span>
               <button
                 type="button"

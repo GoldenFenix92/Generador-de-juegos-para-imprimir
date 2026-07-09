@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+import { useResponsiveCell, cellFontSize } from "../../../lib/useResponsiveCell";
 import type { SudokuConfig, SudokuOutput } from "./types";
 
 interface SudokuProps {
@@ -5,50 +7,123 @@ interface SudokuProps {
   config: SudokuConfig;
 }
 
+function getBoxSize(size: number): { boxRows: number; boxCols: number } {
+  if (size === 4) return { boxRows: 2, boxCols: 2 };
+  if (size === 6) return { boxRows: 2, boxCols: 3 };
+  return { boxRows: 3, boxCols: 3 };
+}
+
+function getMaxCell(size: number): number {
+  if (size <= 4) return 72;
+  if (size <= 6) return 64;
+  return 56;
+}
+
 export default function Sudoku({ data }: SudokuProps) {
   const { puzzle, solution } = data;
+  const size = puzzle.length;
+  const { boxRows, boxCols } = getBoxSize(size);
+  const maxCell = getMaxCell(size);
+  const { ref: gridRef, cellPx } = useResponsiveCell(size, maxCell, 1);
+  const { ref: solRef, cellPx: solCellPx } = useResponsiveCell(size, Math.min(maxCell, 40), 1);
+
+  const cellStyle: React.CSSProperties = useMemo(() => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: cellPx,
+    height: cellPx,
+    fontFamily: "var(--font-body)",
+    fontSize: cellFontSize(cellPx),
+    fontWeight: 700,
+  }), [cellPx]);
+
+  const solCellStyle: React.CSSProperties = useMemo(() => ({
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: solCellPx,
+    height: solCellPx,
+    fontFamily: "var(--font-body)",
+    fontSize: cellFontSize(solCellPx),
+    fontWeight: 600,
+    color: "var(--text-muted)",
+  }), [solCellPx]);
 
   return (
-    <div className="flex flex-col items-center gap-6 w-full overflow-x-auto">
-      <div className="grid grid-cols-9 gap-px bg-gray-300">
-        {puzzle.map((row, r) =>
-          row.map((cell, c) => {
-            const isInitial = solution[r][c] !== 0 && puzzle[r][c] !== 0;
-            const isClue = cell !== 0;
-            const borderRight = (c + 1) % 3 === 0 && c < 8;
-            const borderBottom = (r + 1) % 3 === 0 && r < 8;
+    <div className="flex flex-col items-center gap-6 w-full">
+      <div ref={gridRef} className="glass-card !p-2 w-full sm:w-fit overflow-hidden" style={{ margin: "0 auto" }}>
+        <div
+          className="grid gap-px select-none"
+          style={{
+            gridTemplateColumns: `repeat(${size}, ${cellPx}px)`,
+            justifyContent: "center",
+            backgroundColor: "#9CA3AF",
+          }}
+        >
+          {puzzle.map((row, r) =>
+            row.map((cell, c) => {
+              const isClue = cell !== 0;
+              const borderRight = (c + 1) % boxCols === 0 && c < size - 1;
+              const borderBottom = (r + 1) % boxRows === 0 && r < size - 1;
 
-            return (
-              <div
-                key={`${r}-${c}`}
-                className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center text-sm font-mono ${
-                  isClue ? "font-bold text-gray-900" : "text-blue-600"
-                } bg-white ${borderRight ? "border-r-2 border-r-gray-800" : ""} ${
-                  borderBottom ? "border-b-2 border-b-gray-800" : ""
-                }`}
-              >
-                {isInitial ? solution[r][c] : cell !== 0 ? cell : ""}
-              </div>
-            );
-          }),
-        )}
+              return (
+                <div
+                  key={`${r}-${c}`}
+                  style={{
+                    ...cellStyle,
+                    color: isClue ? "var(--text-primary)" : "var(--accent)",
+                    backgroundColor: "var(--card-bg)",
+                    borderRight: borderRight ? "2px solid var(--text-primary)" : "0.5px solid var(--card-border)",
+                    borderBottom: borderBottom ? "2px solid var(--text-primary)" : "0.5px solid var(--card-border)",
+                  }}
+                >
+                  {isClue ? cell : ""}
+                </div>
+              );
+            }),
+          )}
+        </div>
       </div>
 
       <details className="w-full max-w-md">
-        <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
-          Ver solución
+        <summary className="cursor-pointer text-sm font-medium transition-all" style={{ color: "var(--text-muted)" }}>
+          Ver solucion
         </summary>
-        <div className="mt-2 grid grid-cols-9 gap-px bg-gray-200">
-          {solution.map((row, r) =>
-            row.map((cell, c) => (
-              <div
-                key={`${r}-${c}`}
-                className="flex h-7 w-7 items-center justify-center bg-white text-xs text-gray-600"
-              >
-                {cell}
-              </div>
-            )),
-          )}
+        <div
+          ref={solRef}
+          className="mt-2 p-2 w-full sm:w-fit overflow-hidden"
+          style={{ margin: "0 auto", border: "0.5px solid var(--card-border)", borderRadius: "var(--radius-sm)" }}
+        >
+          <div
+            className="grid gap-px"
+            style={{
+              gridTemplateColumns: `repeat(${size}, ${solCellPx}px)`,
+              justifyContent: "center",
+              backgroundColor: "#9CA3AF",
+            }}
+          >
+            {solution.map((row, r) =>
+              row.map((cell, c) => {
+                const borderRight = (c + 1) % boxCols === 0 && c < size - 1;
+                const borderBottom = (r + 1) % boxRows === 0 && r < size - 1;
+
+                return (
+                  <div
+                    key={`${r}-${c}`}
+                    style={{
+                      ...solCellStyle,
+                      backgroundColor: "var(--card-bg)",
+                      borderRight: borderRight ? "2px solid var(--text-primary)" : "0.5px solid var(--card-border)",
+                      borderBottom: borderBottom ? "2px solid var(--text-primary)" : "0.5px solid var(--card-border)",
+                    }}
+                  >
+                    {cell}
+                  </div>
+                );
+              }),
+            )}
+          </div>
         </div>
       </details>
     </div>

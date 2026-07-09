@@ -4,6 +4,7 @@ import { getGameDefinition } from "../lib/gameRegistry";
 import type { GameId } from "../lib/gameRegistry";
 import { Button } from "../components/ui/Button";
 import WordSearch from "../components/games/wordsearch/WordSearch";
+import SudokuOnline from "../components/games/sudoku/SudokuOnline";
 import { useGeneratorStore } from "../store/generator";
 
 const GAME_LABELS: Record<string, string> = {
@@ -27,6 +28,7 @@ export default function PlayOnline() {
   const label = GAME_LABELS[gameId] ?? "Juego";
   const storedConfig = useGeneratorStore((s) => s.configs[gameId]);
   const isWordSearch = gameId === "wordsearch";
+  const isSudoku = gameId === "sudoku";
 
   const config = storedConfig ?? definition?.defaultConfig;
   const [page, setPage] = useState(0);
@@ -35,11 +37,11 @@ export default function PlayOnline() {
   const outputs = useMemo(() => {
     if (!definition || !config) return null;
     const count = (config as any).sheetCount ?? 1;
-    if (isWordSearch && count > 1) {
+    if (count > 1) {
       return Array.from({ length: count }, () => definition.generate(config));
     }
     return definition.generate(config);
-  }, [definition, config, isWordSearch]);
+  }, [definition, config]);
 
   const dataArray = Array.isArray(outputs) ? outputs : (outputs ? [outputs] : []);
   const totalPages = dataArray.length;
@@ -70,6 +72,8 @@ export default function PlayOnline() {
     );
   }
 
+  const showConfig = { ...config, showSolution: false } as any;
+
   return (
     <div>
       <Button variant="tertiary" slideIcon={slideArrow} className="mb-4" onClick={() => navigate(`/generator/${gameId}`)}>
@@ -92,7 +96,7 @@ export default function PlayOnline() {
             Anterior
           </button>
           <span className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>
-            Sopa {page + 1} de {totalPages}
+            Pagina {page + 1} de {totalPages}
           </span>
           <button
             type="button"
@@ -112,20 +116,24 @@ export default function PlayOnline() {
       {allDone ? (
         <div className="glass-card p-8 text-center">
           <p className="text-2xl font-bold" style={{ color: "var(--accent)" }}>
-            Completaste todas las sopas de letras!
+            Completaste todos los {label.toLowerCase()}!
           </p>
         </div>
-      ) : (
-        isWordSearch ? (
-          <WordSearch
-            data={currentData}
-            config={{ ...config, showSolution: false } as any}
-            onComplete={handleComplete}
-          />
-        ) : (
-          <definition.Preview data={currentData as any} config={{ ...config, showSolution: false } as any} />
-        )
-      )}
+      ) : isWordSearch ? (
+        <WordSearch
+          data={currentData}
+          config={showConfig}
+          onComplete={handleComplete}
+        />
+      ) : isSudoku ? (
+        <SudokuOnline
+          data={currentData}
+          config={config}
+          onComplete={handleComplete}
+        />
+      ) : definition ? (
+        <definition.Preview data={currentData as any} config={showConfig} />
+      ) : null}
     </div>
   );
 }

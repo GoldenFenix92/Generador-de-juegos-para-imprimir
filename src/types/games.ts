@@ -5,6 +5,7 @@ export type Difficulty = "easy" | "medium" | "hard" | "expert";
 export interface GameConfig {
   size: number;
   difficulty: Difficulty;
+  showSolutionInPDF?: boolean;
 }
 
 export interface GameDefinition<TOutput, TConfig extends GameConfig = GameConfig> {

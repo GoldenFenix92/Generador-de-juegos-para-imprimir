@@ -1,52 +1,170 @@
 import { View, Text, StyleSheet } from "@react-pdf/renderer";
 import type { SudokuConfig, SudokuOutput } from "./types";
 
+const MARGIN = 28;
+const W = 612 - MARGIN * 2;
+const H = 792 - MARGIN * 2;
+const H80 = H * 0.80;
+const H6 = H * 0.06;
+const H4 = H * 0.04;
+
+const LABEL: Record<string, string> = {
+  easy: "Facil",
+  medium: "Medio",
+  hard: "Dificil",
+  expert: "Experto",
+};
+
+function getBoxSize(size: number): { boxRows: number; boxCols: number } {
+  if (size === 4) return { boxRows: 2, boxCols: 2 };
+  if (size === 6) return { boxRows: 2, boxCols: 3 };
+  return { boxRows: 3, boxCols: 3 };
+}
+
+function calcCell(g: number, isSolution = false): { px: number; fs: number } {
+  const px = Math.floor(Math.min(W / g, H80 / g));
+  const maxC = isSolution ? 34 : g <= 4 ? 72 : g <= 6 ? 60 : 52;
+  const cell = Math.min(px, maxC);
+  const fs = cell >= 32 ? 14 : cell >= 28 ? 12 : cell >= 22 ? 10 : cell >= 18 ? 9 : 8;
+  return { px: cell, fs };
+}
+
 const styles = StyleSheet.create({
+  page: { padding: MARGIN, fontFamily: "Helvetica" },
+  header: {
+    height: H6,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  title: { fontSize: 18, fontWeight: 700, letterSpacing: 1 },
+  subtitle: { fontSize: 11, marginTop: 2, color: "#555", fontWeight: 500 },
+  instructions: {
+    height: H4 + 4,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 6,
+  },
+  instrText: {
+    fontSize: 9.5,
+    color: "#666",
+    fontWeight: 700,
+    fontStyle: "italic",
+    textAlign: "center",
+  },
+  body: {
+    height: H80,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   grid: { flexDirection: "column", alignItems: "center" },
   row: { flexDirection: "row" },
   cell: {
-    width: 28,
-    height: 28,
-    fontSize: 12,
-    fontFamily: "Courier",
-    textAlign: "center" as const,
-    lineHeight: 28,
+    textAlign: "center",
+    fontFamily: "Helvetica",
+    fontWeight: 600,
     borderWidth: 0.5,
-    borderColor: "#999",
+    borderColor: "#ccc",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fafafa",
   },
-  header: { fontSize: 14, marginBottom: 12, textAlign: "center" as const },
+  footer: {
+    height: H - H80 - H6 - (H4 + 4),
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 10,
+  },
+  footerText: { fontSize: 10, color: "#888", textAlign: "center" },
 });
+
+function SudokuGrid({ data, config: _config, showSolution }: { data: SudokuOutput; config: SudokuConfig; showSolution: boolean }) {
+  const grid = showSolution ? data.solution : data.puzzle;
+  const size = grid.length;
+  const { boxRows, boxCols } = getBoxSize(size);
+  const { px: cellPx, fs: cellFs } = calcCell(size, showSolution);
+
+  return (
+    <View style={styles.grid}>
+      {grid.map((row, r) => (
+        <View key={r} style={styles.row}>
+          {row.map((cell, c) => {
+            const rightThick = (c + 1) % boxCols === 0 && c < size - 1;
+            const bottomThick = (r + 1) % boxRows === 0 && r < size - 1;
+            return (
+              <View
+                key={c}
+                style={[
+                  styles.cell,
+                  { width: cellPx, height: cellPx, fontSize: cellFs },
+                  rightThick ? { borderRightWidth: 2, borderRightColor: "#000" } : {},
+                  bottomThick ? { borderBottomWidth: 2, borderBottomColor: "#000" } : {},
+                ]}
+              >
+                <Text>{cell !== 0 ? cell : ""}</Text>
+              </View>
+            );
+          })}
+        </View>
+      ))}
+    </View>
+  );
+}
 
 interface SudokuPDFProps {
   data: SudokuOutput;
   config: SudokuConfig;
 }
 
-export default function SudokuPDF({ data }: SudokuPDFProps) {
-  const { puzzle } = data;
+export default function SudokuPDF({ data, config }: SudokuPDFProps) {
+  const size = data.puzzle.length;
 
   return (
-    <View>
-      <Text style={styles.header}>Sudoku</Text>
-      <View style={styles.grid}>
-        {puzzle.map((row, r) => (
-          <View key={r} style={styles.row}>
-            {row.map((cell, c) => {
-              const rightThick = (c + 1) % 3 === 0 && c < 8;
-              const bottomThick = (r + 1) % 3 === 0 && r < 8;
-              const style = {
-                ...styles.cell,
-                ...(rightThick ? { borderRightWidth: 2, borderRightColor: "#000" } : {}),
-                ...(bottomThick ? { borderBottomWidth: 2, borderBottomColor: "#000" } : {}),
-              };
-              return (
-                <Text key={c} style={style}>
-                  {cell !== 0 ? cell : ""}
-                </Text>
-              );
-            })}
-          </View>
-        ))}
+    <View style={styles.page}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Sudoku</Text>
+        <Text style={styles.subtitle}>
+          Dificultad: {LABEL[config.difficulty] ?? "Facil"} · {size}x{size}
+        </Text>
+      </View>
+
+      <View style={styles.instructions}>
+        <Text style={styles.instrText}>
+          Rellena las celdas vacias con numeros del 1 al {size} sin repetir en filas, columnas ni cuadros.
+        </Text>
+      </View>
+
+      <View style={styles.body}>
+        <SudokuGrid data={data} config={config} showSolution={false} />
+      </View>
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>
+          {size}x{size} · Nivel {LABEL[config.difficulty] ?? "Facil"}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+export function SolutionPDF({ data, config }: SudokuPDFProps) {
+  const size = data.solution.length;
+
+  return (
+    <View style={styles.page}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Sudoku — Solucion</Text>
+        <Text style={styles.subtitle}>
+          Dificultad: {LABEL[config.difficulty] ?? "Facil"} · {size}x{size}
+        </Text>
+      </View>
+
+      <View style={styles.body}>
+        <SudokuGrid data={data} config={config} showSolution={true} />
+      </View>
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Solucion completa</Text>
       </View>
     </View>
   );
