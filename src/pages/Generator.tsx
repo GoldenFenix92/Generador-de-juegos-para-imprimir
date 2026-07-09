@@ -33,7 +33,6 @@ interface WSConfig extends GameConfig {
   theme?: ThemeId;
   customWords?: string[];
   sheetCount: number;
-  showSolutionInPDF?: boolean;
 }
 
 function WordSearchOptions({
@@ -198,6 +197,7 @@ export default function Generator() {
   }
 
   const isWordSearch = gameId === "wordsearch";
+  const isSudoku = gameId === "sudoku";
   const previewConfig = { ...config, showSolution: true };
 
   if (!definition) {
@@ -296,6 +296,71 @@ export default function Generator() {
         </>
       )}
 
+      {isSudoku && (
+        <>
+          <div className="glass-card mb-4 px-5 py-4">
+            <p className="mb-1 font-medium text-primary">Instrucciones:</p>
+            <ol className="list-inside list-decimal space-y-1 text-muted text-sm">
+              <li>Selecciona la dificultad y la cantidad de sudokus a generar.</li>
+              <li>Haz clic en <strong className="text-primary">&quot;Generar Sudoku&quot;</strong> para crear el puzzle.</li>
+              <li>
+                Elige <strong className="text-primary">&quot;Ver para imprimir&quot;</strong> para descargar en PDF o imprimir, o selecciona el modo
+                &quot;Jugar online&quot; para resolverlo en pantalla.
+              </li>
+            </ol>
+          </div>
+
+          <details className="glass-card mb-4 px-5 py-3 open:pb-5">
+            <summary className="cursor-pointer text-sm font-medium text-primary select-none">
+              Caracteristicas de cada dificultad
+            </summary>
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b" style={{ borderColor: "var(--card-border)" }}>
+                    <th className="px-2 py-1 font-medium text-muted">Dificultad</th>
+                    <th className="px-2 py-1 font-medium text-muted">Grid</th>
+                    <th className="px-2 py-1 font-medium text-muted">Cajas</th>
+                    <th className="px-2 py-1 font-medium text-muted">Numeros</th>
+                    <th className="px-2 py-1 font-medium text-muted">Pistas iniciales</th>
+                  </tr>
+                </thead>
+                <tbody className="text-muted">
+                  <tr className="border-b" style={{ borderColor: "var(--card-border)" }}>
+                    <td className="px-2 py-1 font-medium text-primary">Facil</td>
+                    <td className="px-2 py-1">4x4</td>
+                    <td className="px-2 py-1">2x2</td>
+                    <td className="px-2 py-1">1-4</td>
+                    <td className="px-2 py-1">~11</td>
+                  </tr>
+                  <tr className="border-b" style={{ borderColor: "var(--card-border)" }}>
+                    <td className="px-2 py-1 font-medium text-primary">Medio</td>
+                    <td className="px-2 py-1">6x6</td>
+                    <td className="px-2 py-1">2x3</td>
+                    <td className="px-2 py-1">1-6</td>
+                    <td className="px-2 py-1">~23</td>
+                  </tr>
+                  <tr className="border-b" style={{ borderColor: "var(--card-border)" }}>
+                    <td className="px-2 py-1 font-medium text-primary">Dificil</td>
+                    <td className="px-2 py-1">9x9</td>
+                    <td className="px-2 py-1">3x3</td>
+                    <td className="px-2 py-1">1-9</td>
+                    <td className="px-2 py-1">~33</td>
+                  </tr>
+                  <tr>
+                    <td className="px-2 py-1 font-medium text-primary">Experto</td>
+                    <td className="px-2 py-1">9x9</td>
+                    <td className="px-2 py-1">3x3</td>
+                    <td className="px-2 py-1">1-9</td>
+                    <td className="px-2 py-1">~21</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </>
+      )}
+
       <div className="glass-card mb-6 p-5 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end gap-4">
         <DifficultySelector
           value={config.difficulty}
@@ -340,24 +405,10 @@ export default function Generator() {
           </>
         )}
 
-        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={config.showSolutionInPDF ?? false}
-              onChange={(e) => patch({ showSolutionInPDF: e.target.checked })}
-              className="h-4 w-4 rounded accent-purple-600"
-            />
-            <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-              Incluir solucion en PDF
-            </span>
-          </label>
-        </div>
-
         <div className="flex flex-wrap items-end gap-3 w-full sm:w-auto mt-2 sm:mt-0">
           {data && (
             <Button
-              variant="tertiary"
+              variant="danger"
               className="w-full sm:w-auto"
               slideIcon={
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

@@ -4,8 +4,8 @@ import type { SudokuConfig, SudokuOutput } from "./types";
 const GRID_CONFIGS: Record<string, { size: number; boxRows: number; boxCols: number; remove: number }> = {
   easy:   { size: 4, boxRows: 2, boxCols: 2, remove: 5 },
   medium: { size: 6, boxRows: 2, boxCols: 3, remove: 13 },
-  hard:   { size: 9, boxRows: 3, boxCols: 3, remove: 48 },
-  expert: { size: 9, boxRows: 3, boxCols: 3, remove: 60 },
+  hard:   { size: 9, boxRows: 3, boxCols: 3, remove: 42 },
+  expert: { size: 9, boxRows: 3, boxCols: 3, remove: 62 },
 };
 
 function shuffleArray<T>(arr: T[]): T[] {

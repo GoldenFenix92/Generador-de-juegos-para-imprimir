@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "tertiary";
+  variant?: "primary" | "secondary" | "tertiary" | "danger";
   slideIcon?: ReactNode;
 }
 
@@ -12,6 +12,7 @@ const variants: Record<string, string> = {
   primary: "text-white border-none",
   secondary: "border backdrop-blur-lg",
   tertiary: "border backdrop-blur-sm",
+  danger: "text-white border-none",
 };
 
 const variantStyle: Record<string, React.CSSProperties> = {
@@ -29,12 +30,17 @@ const variantStyle: Record<string, React.CSSProperties> = {
     borderColor: "var(--select-border)",
     color: "var(--text-muted)",
   },
+  danger: {
+    background: "linear-gradient(135deg, #B91C1C, #991B1B)",
+    boxShadow: "0 4px 16px rgba(185,28,28,0.35)",
+  },
 };
 
 const slideOverlay: Record<string, string> = {
   primary: "rgba(0,0,0,0.15)",
   secondary: "var(--accent-glow)",
   tertiary: "rgba(255,255,255,0.04)",
+  danger: "rgba(255,255,255,0.15)",
 };
 
 export function Button({

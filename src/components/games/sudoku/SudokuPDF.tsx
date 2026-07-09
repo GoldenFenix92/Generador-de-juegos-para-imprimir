@@ -4,9 +4,9 @@ import type { SudokuConfig, SudokuOutput } from "./types";
 const MARGIN = 28;
 const W = 612 - MARGIN * 2;
 const H = 792 - MARGIN * 2;
-const H80 = H * 0.80;
+const H80 = H * 0.78;
 const H6 = H * 0.06;
-const H4 = H * 0.04;
+const H5 = H * 0.05;
 
 const LABEL: Record<string, string> = {
   easy: "Facil",
@@ -39,14 +39,21 @@ const styles = StyleSheet.create({
   title: { fontSize: 18, fontWeight: 700, letterSpacing: 1 },
   subtitle: { fontSize: 11, marginTop: 2, color: "#555", fontWeight: 500 },
   instructions: {
-    height: H4 + 4,
+    height: H5,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 6,
+    paddingHorizontal: 8,
   },
   instrText: {
     fontSize: 9.5,
     color: "#666",
+    fontWeight: 700,
+    fontStyle: "italic",
+    textAlign: "center",
+  },
+  instrBold: {
+    fontSize: 9.5,
+    color: "#444",
     fontWeight: 700,
     fontStyle: "italic",
     textAlign: "center",
@@ -70,12 +77,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fafafa",
   },
   footer: {
-    height: H - H80 - H6 - (H4 + 4),
+    height: H - H80 - H6 - H5,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 10,
   },
-  footerText: { fontSize: 10, color: "#888", textAlign: "center" },
+  footerText: { fontSize: 9, color: "#999", textAlign: "center" },
 });
 
 function SudokuGrid({ data, config: _config, showSolution }: { data: SudokuOutput; config: SudokuConfig; showSolution: boolean }) {
@@ -118,19 +125,20 @@ interface SudokuPDFProps {
 
 export default function SudokuPDF({ data, config }: SudokuPDFProps) {
   const size = data.puzzle.length;
+  const { boxRows, boxCols } = getBoxSize(size);
 
   return (
     <View style={styles.page}>
       <View style={styles.header}>
         <Text style={styles.title}>Sudoku</Text>
         <Text style={styles.subtitle}>
-          Dificultad: {LABEL[config.difficulty] ?? "Facil"} · {size}x{size}
+          {size}x{size} · {LABEL[config.difficulty] ?? "Facil"}
         </Text>
       </View>
 
       <View style={styles.instructions}>
         <Text style={styles.instrText}>
-          Rellena las celdas vacias con numeros del 1 al {size} sin repetir en filas, columnas ni cuadros.
+          Rellena las celdas vacias con numeros del 1 al {size} sin repetir en filas, columnas ni cuadros de {boxRows}x{boxCols}.
         </Text>
       </View>
 
@@ -139,9 +147,7 @@ export default function SudokuPDF({ data, config }: SudokuPDFProps) {
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>
-          {size}x{size} · Nivel {LABEL[config.difficulty] ?? "Facil"}
-        </Text>
+        <Text style={styles.footerText}>generadordejuegos.com</Text>
       </View>
     </View>
   );
@@ -155,7 +161,7 @@ export function SolutionPDF({ data, config }: SudokuPDFProps) {
       <View style={styles.header}>
         <Text style={styles.title}>Sudoku — Solucion</Text>
         <Text style={styles.subtitle}>
-          Dificultad: {LABEL[config.difficulty] ?? "Facil"} · {size}x{size}
+          {size}x{size} · {LABEL[config.difficulty] ?? "Facil"}
         </Text>
       </View>
 
@@ -164,7 +170,7 @@ export function SolutionPDF({ data, config }: SudokuPDFProps) {
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Solucion completa</Text>
+        <Text style={styles.footerText}>generadordejuegos.com</Text>
       </View>
     </View>
   );
