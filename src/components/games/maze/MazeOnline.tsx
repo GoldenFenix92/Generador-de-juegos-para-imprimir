@@ -67,10 +67,11 @@ export default function MazeOnline({ data, onComplete }: MazeOnlineProps) {
     completedRef.current = false;
   }, [startWall]);
 
-  const handleCellClick = useCallback(
+  const processCell = useCallback(
     (r: number, c: number) => {
       if (walls[r][c]) return;
-      if (pathSet.has(`${r},${c}`)) {
+      const key = `${r},${c}`;
+      if (pathSet.has(key)) {
         if (path.length >= 2) {
           const prevIdx = path.length - 2;
           if (path[prevIdx][0] === r && path[prevIdx][1] === c) {
@@ -86,6 +87,50 @@ export default function MazeOnline({ data, onComplete }: MazeOnlineProps) {
     },
     [walls, pathSet, path],
   );
+
+  const handleCellClick = useCallback(
+    (r: number, c: number) => processCell(r, c),
+    [processCell],
+  );
+
+  const touchLastRef = useRef<string | null>(null);
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      const touch = e.touches[0];
+      const el = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement | null;
+      if (!el) return;
+      const key = el.dataset.cell;
+      if (!key) return;
+      touchLastRef.current = key;
+      const [r, c] = key.split(",").map(Number);
+      processCell(r, c);
+    },
+    [processCell],
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      const touch = e.touches[0];
+      const el = document.elementFromPoint(touch.clientX, touch.clientY) as HTMLElement | null;
+      if (!el) return;
+      const key = el.dataset.cell;
+      if (!key || key === touchLastRef.current) return;
+      touchLastRef.current = key;
+      const [r, c] = key.split(",").map(Number);
+      processCell(r, c);
+    },
+    [processCell],
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    touchLastRef.current = null;
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener("touchend", handleTouchEnd);
+    return () => document.removeEventListener("touchend", handleTouchEnd);
+  }, [handleTouchEnd]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -133,7 +178,8 @@ export default function MazeOnline({ data, onComplete }: MazeOnlineProps) {
         style={{ margin: "0 auto" }}
       >
         <div
-          className="grid gap-px select-none"
+          className="grid gap-px select-none touch-none"
+          onTouchMove={handleTouchMove}
           style={{
             gridTemplateColumns: `repeat(${wallCols}, ${cellPx}px)`,
             justifyContent: "center",
@@ -151,7 +197,9 @@ export default function MazeOnline({ data, onComplete }: MazeOnlineProps) {
               return (
                 <div
                   key={key}
+                  data-cell={key}
                   onClick={() => isOpen && handleCellClick(r, c)}
+                  onTouchStart={isOpen ? handleTouchStart : undefined}
                   style={{ width: cellPx, height: cellPx, cursor: isOpen ? "pointer" : "default" }}
                   className={
                     isStart
