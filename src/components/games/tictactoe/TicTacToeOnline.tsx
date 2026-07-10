@@ -178,6 +178,116 @@ function aiMinimax(grid: Cell[][], player: Player, winLength: number): [number, 
   return bestMove;
 }
 
+function evaluateBoard(board: Cell[][], player: Player, winLength: number): number {
+  const size = board.length;
+  let score = 0;
+
+  function lineScore(cells: [number, number][]): void {
+    let playerCount = 0;
+    let opponentCount = 0;
+    for (const [r, c] of cells) {
+      if (board[r][c] === player) playerCount++;
+      else if (board[r][c] !== null) opponentCount++;
+    }
+    if (playerCount > 0 && opponentCount > 0) return;
+    if (playerCount > 0) score += Math.pow(10, playerCount - 1);
+    if (opponentCount > 0) score -= Math.pow(10, opponentCount);
+  }
+
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c <= size - winLength; c++) {
+      const cells: [number, number][] = [];
+      for (let i = 0; i < winLength; i++) cells.push([r, c + i]);
+      lineScore(cells);
+    }
+  }
+
+  for (let c = 0; c < size; c++) {
+    for (let r = 0; r <= size - winLength; r++) {
+      const cells: [number, number][] = [];
+      for (let i = 0; i < winLength; i++) cells.push([r + i, c]);
+      lineScore(cells);
+    }
+  }
+
+  for (let r = 0; r <= size - winLength; r++) {
+    for (let c = 0; c <= size - winLength; c++) {
+      const cells: [number, number][] = [];
+      for (let i = 0; i < winLength; i++) cells.push([r + i, c + i]);
+      lineScore(cells);
+    }
+  }
+
+  for (let r = 0; r <= size - winLength; r++) {
+    for (let c = winLength - 1; c < size; c++) {
+      const cells: [number, number][] = [];
+      for (let i = 0; i < winLength; i++) cells.push([r + i, c - i]);
+      lineScore(cells);
+    }
+  }
+
+  return score;
+}
+
+function aiMinimaxLimited(grid: Cell[][], player: Player, winLength: number, maxDepth: number): [number, number] {
+  const opponent: Player = player === "X" ? "O" : "X";
+
+  function minimax(
+    board: Cell[][],
+    isMaximizing: boolean,
+    depth: number,
+    alpha: number,
+    beta: number,
+  ): number {
+    const result = checkWin(board, winLength);
+    if (result.winner === player) return 100000 - depth;
+    if (result.winner === opponent) return depth - 100000;
+    if (isBoardFull(board)) return 0;
+    if (depth >= maxDepth) return evaluateBoard(board, player, winLength);
+
+    const empty = getEmptyCells(board);
+    if (isMaximizing) {
+      let best = -Infinity;
+      for (const [r, c] of empty) {
+        board[r][c] = player;
+        const s = minimax(board, false, depth + 1, alpha, beta);
+        board[r][c] = null;
+        best = Math.max(best, s);
+        alpha = Math.max(alpha, s);
+        if (beta <= alpha) break;
+      }
+      return best;
+    } else {
+      let best = Infinity;
+      for (const [r, c] of empty) {
+        board[r][c] = opponent;
+        const s = minimax(board, true, depth + 1, alpha, beta);
+        board[r][c] = null;
+        best = Math.min(best, s);
+        beta = Math.min(beta, s);
+        if (beta <= alpha) break;
+      }
+      return best;
+    }
+  }
+
+  const board = grid.map((row) => [...row]);
+  let bestScore = -Infinity;
+  let bestMove: [number, number] = [0, 0];
+
+  for (const [r, c] of getEmptyCells(grid)) {
+    board[r][c] = player;
+    const s = minimax(board, false, 0, -Infinity, Infinity);
+    board[r][c] = null;
+    if (s > bestScore) {
+      bestScore = s;
+      bestMove = [r, c];
+    }
+  }
+
+  return bestMove;
+}
+
 export default function TicTacToeOnline({ config, onComplete }: TicTacToeOnlineProps) {
   const gridSize = config.difficulty === "expert" ? 4 : 3;
   const winLength = gridSize === 4 ? 4 : 3;
@@ -245,8 +355,10 @@ export default function TicTacToeOnline({ config, onComplete }: TicTacToeOnlineP
           move = aiRandom(copy);
         } else if (config.difficulty === "medium") {
           move = aiStrategic(copy, "O", winLength);
-        } else {
+        } else if (config.difficulty === "hard") {
           move = aiMinimax(copy, "O", winLength);
+        } else {
+          move = aiMinimaxLimited(copy, "O", winLength, 4);
         }
 
         copy[move[0]][move[1]] = "O";

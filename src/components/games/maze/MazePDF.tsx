@@ -16,8 +16,8 @@ const LABEL: Record<string, string> = {
 };
 
 function calcCell(g: number): number {
-  const px = Math.floor(Math.min(W / g, H80 / g));
-  return Math.min(px, 56);
+  const px = Math.floor(Math.min(W / g, H80 / g) * 1.3);
+  return Math.min(px, 73);
 }
 
 const styles = StyleSheet.create({
