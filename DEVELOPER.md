@@ -191,13 +191,14 @@ El header y footer tambien usan `px-4 sm:px-6`.
 
 ### Button (`src/components/ui/Button.tsx`)
 
-3 variantes con sistema de animacion slideIcon:
+4 variantes con sistema de animacion slideIcon:
 
 | Variant | Estilo | Uso |
 |---------|--------|-----|
 | `primary` | Gradient indigo-rose + glow | Accion principal |
 | `secondary` | Glass con borde semitransparente | Accion secundaria |
 | `tertiary` | Ghost con blur-sm tenue | Volver / acciones sutiles |
+| `danger` | Gradient rojo oscuro + overlay hover blanco | Limpiar / resetear |
 
 Prop `slideIcon`: cuando se provee un elemento JSX, al hacer hover el texto se desliza horizontalmente y un overlay con el icono escala de 0 a 1.
 
@@ -238,16 +239,6 @@ Selector colapsable con 4 niveles: Facil, Medio, Dificil, Experto.
 - Cuando se encuentran todas, se muestra mensaje de felicitaciones
 - El puzzle se genera fresh en cada carga (anti-trampas)
 
-### Responsive grid (useResponsiveCell)
-En `WordSearch.tsx`, el hook `useResponsiveCell(cols, maxCell=36)`:
-- Mide el contenedor via `ResizeObserver`
-- Calcula `cellPx = floor((containerWidth - padding - gaps) / cols)`, clamp entre 16px y maxCell
-- El font-size escala proporcionalmente: `14px` (≥32px), `12px` (≥24px), `11px` (≥18px), `10px` (<18px)
-
-El glass-card usa `w-full sm:w-fit`:
-- Mobile: ocupa el ancho disponible → celdas se achican para evitar overflow
-- Tablet+: shrink-wrap alrededor del grid → centrado por `items-center` del flex parent
-
 ### Touch events (seleccion en mobile)
 OnlineGrid maneja eventos touch ademas de mouse:
 - `onTouchStart` en cada celda → inicia seleccion (como `mousedown`)
@@ -256,10 +247,53 @@ OnlineGrid maneja eventos touch ademas de mouse:
 - `touch-none` (CSS `touch-action: none`) en el grid para prevenir scroll durante seleccion
 - Sin `preventDefault()` redundante (eventos touch son pasivos por defecto)
 
-### Sudoku, Maze, TicTacToe — overflow safety
-- Sudoku: `overflow-x-auto`, celdas `h-8 w-8 sm:h-9 sm:w-9`
-- Maze: `overflow-x-auto`, celdas 18px inline
-- TicTacToe: `overflow-x-auto`, celdas `h-16 w-16 sm:h-20 sm:w-20`
+## Laberinto — Funcionalidades especificas
+
+### Niveles de dificultad
+
+| Nivel | Grid (celdas) | Algoritmo | Caminos alternativos |
+|-------|--------------|-----------|---------------------|
+| Facil | 5x5 | Braided (DFS + ~25% dead-end removal) | Si — mas facil |
+| Medio | 8x8 | DFS perfecto | No |
+| Dificil | 12x12 | DFS perfecto | No |
+| Experto | 16x16 | DFS perfecto | No |
+
+### Generacion (`generate.ts`)
+- `DIFFICULTY_CONFIG` mapea dificultad a `{ size, braidChance }`
+- `generateMazeDFS()` genera un laberinto perfecto (un solo camino) con DFS recursivo
+- `braid(grid, chance)` recorre celdas sin salida (3 paredes) y elimina una pared con `chance` de probabilidad — solo se usa en Facil
+- `solveMazeBFS()` resuelve con BFS para obtener la solucion
+- El `size` en el config se ignora; el tamano se deriva exclusivamente de la dificultad
+
+### Modo online (`MazeOnline.tsx`)
+- Path trazado clickeando celdas adyacentes abiertas (distancia Manhattan 1 en espacio de paredes)
+- Click en la celda anterior → backtrack (elimina el ultimo paso)
+- Flechas del teclado para moverse
+- Boton "Limpiar camino" (variant `danger` con slideIcon) para resetear
+- Deteccion de completado: cuando el path llega a la meta → `onComplete()`
+- Grid responsive con `useResponsiveCell(wallCols, maxCell, 1)`
+
+### PDF (`MazePDF.tsx`)
+- Header: titulo + tamano + dificultad
+- Instrucciones: "Encuentra el camino desde la salida (verde) hasta la meta (rojo)"
+- Grilla: start verde, end rojo, solucion azul
+- Footer: dominio
+- `SolutionPDF` exportado para incluir pagina de solucion en el PDF (toggle en PrintPreview)
+- Tamanio de celda calculado como `min(floor(min(W, H80) / wallCols), 56)` en ambos casos
+
+### Grid responsive (useResponsiveCell)
+
+Todas las grillas usan el hook `useResponsiveCell(cols, maxCell, gapPx)`:
+- Mide el contenedor via `ResizeObserver`
+- Calcula `cellPx = floor((containerWidth - padding - gaps) / cols)`, clamp entre 16px y maxCell
+- El glass-card usa `w-full sm:w-fit` para que en mobile ocupe todo el ancho y en desktop se centre
+
+| Juego | Uso |
+|-------|-----|
+| Sopa de Letras | `useResponsiveCell(cols, 36)` con `mode` para elegir variante |
+| Sudoku | `useResponsiveCell(size, maxCell, 1)` con `maxCell` segun tamanio (72/64/56) |
+| Maze | `useResponsiveCell(wallCols, maxCell, 1)` con `maxCell` segun dificultad (48/36/28/22) |
+| TicTacToe | Layout fijo sin hook |
 
 ---
 
@@ -303,6 +337,14 @@ Los datos generados persisten en memoria al navegar entre paginas (Generator →
 - **Grilla:** Letras en Helvetica bold con fondo #fafafa y bordes #ccc
 - **Footer:** Lista de palabras a buscar
 - **Multi-pagina:** PrintPreview genera un `<Document>` con multiples `<Page>` cuando hay varias sopas
+
+### PDF de Laberinto (`MazePDF.tsx`)
+- **Encabezado:** Titulo + tamano de grid + dificultad
+- **Instrucciones:** "Encuentra el camino desde la salida (verde) hasta la meta (rojo)"
+- **Grilla:** Start en verde, end en rojo, celdas de pared en negro, abiertas en blanco, solucion en azul
+- **Footer:** Dominio
+- **Solucion:** `SolutionPDF` exportado para pagina extra con el camino resuelto
+- **Tamanio de celda:** `min(floor(min(W, H80) / wallCols), 56)` — misma escala que Sopa de Letras
 
 ### Lazy loading
 Los componentes PDF se cargan dinamicamente con `getPDFComponent(gameId)` que usa `import()`.

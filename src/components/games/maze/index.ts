@@ -5,7 +5,7 @@ import type { MazeConfig, MazeOutput } from "./types";
 const mazeGame: GameDefinition<MazeOutput, MazeConfig> = {
   generate: generateMaze,
   Preview: Maze,
-  defaultConfig: { size: 8, difficulty: "easy" },
+  defaultConfig: { size: 8, difficulty: "medium" },
 };
 
 export default mazeGame;

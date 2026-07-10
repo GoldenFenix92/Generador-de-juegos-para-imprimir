@@ -3,6 +3,13 @@ import type { MazeConfig, MazeOutput } from "./types";
 // Grid is represented as cells; each cell has 4 walls: [top, right, bottom, left]
 type CellWalls = [boolean, boolean, boolean, boolean];
 
+const DIFFICULTY_CONFIG = {
+  easy: { size: 5, braidChance: 0.25 },
+  medium: { size: 8, braidChance: 0 },
+  hard: { size: 12, braidChance: 0 },
+  expert: { size: 16, braidChance: 0 },
+} as const;
+
 function generateMazeDFS(rows: number, cols: number): CellWalls[][] {
   const grid: CellWalls[][] = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => [true, true, true, true] as CellWalls),
@@ -93,9 +100,43 @@ function solveMazeBFS(
   return path;
 }
 
+function braid(grid: CellWalls[][], chance: number): void {
+  if (chance <= 0) return;
+  const rows = grid.length;
+  const cols = grid[0].length;
+  const dirs: [number, number, number, number][] = [
+    [-1, 0, 0, 2],
+    [0, 1, 1, 3],
+    [1, 0, 2, 0],
+    [0, -1, 3, 1],
+  ];
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const walls = grid[r][c];
+      const wallCount = walls.filter(Boolean).length;
+      if (wallCount !== 3) continue;
+
+      for (const [dr, dc, wallIdx, oppWallIdx] of dirs) {
+        if (!walls[wallIdx]) continue;
+        const nr = r + dr;
+        const nc = c + dc;
+        if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+        if (Math.random() < chance) {
+          grid[r][c][wallIdx] = false;
+          grid[nr][nc][oppWallIdx] = false;
+        }
+      }
+    }
+  }
+}
+
 export function generateMaze(config: MazeConfig): MazeOutput {
-  const size = config.size;
+  const diff = DIFFICULTY_CONFIG[config.difficulty] ?? DIFFICULTY_CONFIG.medium;
+  const size = diff.size;
   const grid = generateMazeDFS(size, size);
+
+  braid(grid, diff.braidChance);
 
   const start: [number, number] = [0, 0];
   const end: [number, number] = [size - 1, size - 1];
