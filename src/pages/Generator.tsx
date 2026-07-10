@@ -199,6 +199,7 @@ export default function Generator() {
   const isWordSearch = gameId === "wordsearch";
   const isSudoku = gameId === "sudoku";
   const isMaze = gameId === "maze";
+  const isTicTacToe = gameId === "tictactoe";
   const previewConfig = { ...config, showSolution: true };
 
   if (!definition) {
@@ -414,6 +415,66 @@ export default function Generator() {
                     <td className="px-2 py-1">16x16</td>
                     <td className="px-2 py-1">DFS perfecto</td>
                     <td className="px-2 py-1">No</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </>
+      )}
+
+      {isTicTacToe && (
+        <>
+          <div className="glass-card mb-4 px-5 py-4">
+            <p className="mb-1 font-medium text-primary">Instrucciones:</p>
+            <ol className="list-inside list-decimal space-y-1 text-muted text-sm">
+              <li>Selecciona la dificultad y la cantidad de tableros a generar.</li>
+              <li>Haz clic en <strong className="text-primary">&quot;Generar Tres en Raya&quot;</strong> para crear los tableros.</li>
+              <li>
+                Elige <strong className="text-primary">&quot;Ver para imprimir&quot;</strong> para descargar en PDF o imprimir, o selecciona el modo
+                &quot;Jugar online&quot; para jugar contra la IA o con otro jugador.
+              </li>
+            </ol>
+          </div>
+
+          <details className="glass-card mb-4 px-5 py-3 open:pb-5">
+            <summary className="cursor-pointer text-sm font-medium text-primary select-none">
+              Caracteristicas de cada dificultad
+            </summary>
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b" style={{ borderColor: "var(--card-border)" }}>
+                    <th className="px-2 py-1 font-medium text-muted">Dificultad</th>
+                    <th className="px-2 py-1 font-medium text-muted">Grid</th>
+                    <th className="px-2 py-1 font-medium text-muted">IA</th>
+                    <th className="px-2 py-1 font-medium text-muted">Gana con</th>
+                  </tr>
+                </thead>
+                <tbody className="text-muted">
+                  <tr className="border-b" style={{ borderColor: "var(--card-border)" }}>
+                    <td className="px-2 py-1 font-medium text-primary">Facil</td>
+                    <td className="px-2 py-1">3x3</td>
+                    <td className="px-2 py-1">Aleatoria</td>
+                    <td className="px-2 py-1">3 en raya</td>
+                  </tr>
+                  <tr className="border-b" style={{ borderColor: "var(--card-border)" }}>
+                    <td className="px-2 py-1 font-medium text-primary">Medio</td>
+                    <td className="px-2 py-1">3x3</td>
+                    <td className="px-2 py-1">Estrategica (bloquea + busca ganar)</td>
+                    <td className="px-2 py-1">3 en raya</td>
+                  </tr>
+                  <tr className="border-b" style={{ borderColor: "var(--card-border)" }}>
+                    <td className="px-2 py-1 font-medium text-primary">Dificil</td>
+                    <td className="px-2 py-1">3x3</td>
+                    <td className="px-2 py-1">Minimax (invencible)</td>
+                    <td className="px-2 py-1">3 en raya</td>
+                  </tr>
+                  <tr>
+                    <td className="px-2 py-1 font-medium text-primary">Experto</td>
+                    <td className="px-2 py-1">4x4</td>
+                    <td className="px-2 py-1">Minimax (invencible)</td>
+                    <td className="px-2 py-1">4 en raya</td>
                   </tr>
                 </tbody>
               </table>

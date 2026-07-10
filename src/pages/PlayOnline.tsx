@@ -6,6 +6,7 @@ import { Button } from "../components/ui/Button";
 import WordSearch from "../components/games/wordsearch/WordSearch";
 import SudokuOnline from "../components/games/sudoku/SudokuOnline";
 import MazeOnline from "../components/games/maze/MazeOnline";
+import TicTacToeOnline from "../components/games/tictactoe/TicTacToeOnline";
 import { useGeneratorStore } from "../store/generator";
 
 const GAME_LABELS: Record<string, string> = {
@@ -31,6 +32,7 @@ export default function PlayOnline() {
   const isWordSearch = gameId === "wordsearch";
   const isSudoku = gameId === "sudoku";
   const isMaze = gameId === "maze";
+  const isTicTacToe = gameId === "tictactoe";
 
   const config = storedConfig ?? definition?.defaultConfig;
   const [page, setPage] = useState(0);
@@ -135,6 +137,12 @@ export default function PlayOnline() {
         />
       ) : isMaze ? (
         <MazeOnline
+          data={currentData}
+          config={config}
+          onComplete={handleComplete}
+        />
+      ) : isTicTacToe ? (
+        <TicTacToeOnline
           data={currentData}
           config={config}
           onComplete={handleComplete}

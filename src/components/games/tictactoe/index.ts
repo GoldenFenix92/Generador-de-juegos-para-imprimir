@@ -5,7 +5,7 @@ import type { TicTacToeConfig, TicTacToeOutput } from "./types";
 const tictactoeGame: GameDefinition<TicTacToeOutput, TicTacToeConfig> = {
   generate: generateTicTacToe,
   Preview: TicTacToe,
-  defaultConfig: { size: 3, difficulty: "easy" },
+  defaultConfig: { size: 3, difficulty: "medium" },
 };
 
 export default tictactoeGame;
