@@ -9,7 +9,7 @@ Aplicacion web para generar, personalizar y descargar juegos educativos en PDF l
 - **Sopa de Letras** — Busca palabras ocultas en una cuadricula. Con 3 modos de generacion (aleatorio, tematico, personalizado), 4 niveles de dificultad, generacion masiva de hasta 10 hojas y modo online interactivo con drag-to-select.
 - **Sudoku** — Completa la cuadricula con numeros del 1 al 9.
 - **Laberinto** — Encuentra el camino desde la salida (verde) hasta la meta (rojo). 4 niveles de dificultad, modo online interactivo para trazar el camino, PDF con solucion.
-- **Tres en Raya** — Clasico juego de tablero para dos jugadores.
+- **Tres en Raya** — Clasico juego de tablero para dos jugadores (sin solucion en PDF).
 
 ## Como usar
 

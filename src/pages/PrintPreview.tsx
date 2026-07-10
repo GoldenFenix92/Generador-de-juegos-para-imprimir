@@ -155,17 +155,19 @@ export default function PrintPreview() {
       <h1 className="mb-6 text-2xl font-bold text-primary">Vista previa - {label}</h1>
 
       <div className="glass-card mb-6 p-4 flex flex-col sm:flex-row flex-wrap gap-3 items-stretch sm:items-center">
-        <label className="flex items-center gap-2 cursor-pointer select-none order-first sm:order-none w-full sm:w-auto">
-          <input
-            type="checkbox"
-            checked={showSolution}
-            onChange={(e) => setShowSolution(e.target.checked)}
-            className="h-4 w-4 rounded accent-purple-600"
-          />
-          <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-            Incluir solucion en PDF
-          </span>
-        </label>
+        {gameId !== "tictactoe" && (
+          <label className="flex items-center gap-2 cursor-pointer select-none order-first sm:order-none w-full sm:w-auto">
+            <input
+              type="checkbox"
+              checked={showSolution}
+              onChange={(e) => setShowSolution(e.target.checked)}
+              className="h-4 w-4 rounded accent-purple-600"
+            />
+            <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+              Incluir solucion en PDF
+            </span>
+          </label>
+        )}
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <Button
             variant="primary"

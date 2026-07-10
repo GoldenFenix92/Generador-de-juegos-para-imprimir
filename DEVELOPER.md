@@ -347,6 +347,9 @@ Los datos generados persisten en memoria al navegar entre paginas (Generator →
 - **Solucion:** `SolutionPDF` exportado para pagina extra con el camino resuelto
 - **Tamanio de celda:** `min(floor(min(W, H80) / wallCols * 1.3), 73)` — escala ×1.3 para mejor legibilidad, cap 73px
 
+### PrintPreview: toggle de solucion
+El checkbox "Incluir solucion en PDF" en PrintPreview se oculta condicionalmente cuando `gameId === "tictactoe"`, ya que Tres en Raya no requiere pagina de solucion. Los demas juegos (WordSearch, Sudoku, Maze) muestran el toggle si exportan un `SolutionPDF`.
+
 ### Lazy loading
 Los componentes PDF se cargan dinamicamente con `getPDFComponent(gameId)` que usa `import()`.
 
