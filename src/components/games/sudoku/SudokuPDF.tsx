@@ -22,10 +22,10 @@ function getBoxSize(size: number): { boxRows: number; boxCols: number } {
 }
 
 function calcCell(g: number, isSolution = false): { px: number; fs: number } {
-  const px = Math.floor(Math.min(W / g, H80 / g) * 1.3);
+  const px = Math.floor(Math.min(W / g, H80 / g));
   const maxC = isSolution ? 44 : g <= 4 ? 94 : g <= 6 ? 78 : 68;
   const cell = Math.min(px, maxC);
-  const fs = cell >= 42 ? 14 : cell >= 36 ? 12 : cell >= 28 ? 10 : cell >= 24 ? 9 : 8;
+  const fs = cell >= 32 ? 14 : cell >= 28 ? 12 : cell >= 22 ? 10 : cell >= 18 ? 9 : 8;
   return { px: cell, fs };
 }
 

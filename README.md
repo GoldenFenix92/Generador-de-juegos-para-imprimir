@@ -48,7 +48,7 @@ Aplicacion web para generar, personalizar y descargar juegos educativos en PDF l
 - **Auto-avance:** al completar un puzzle en modo online, avanza automaticamente al siguiente
 - **4 niveles de dificultad:** Facil, Medio, Dificil, Experto con progresion cualitativa en cada juego
 - **PDF multi-pagina:** descarga todas las hojas en un solo documento con instrucciones y pagina de solucion opcional
-- **Grillas PDF 30% mas grandes:** las celdas de todos los juegos se escalan ×1.3 en el PDF para mejor legibilidad impresa
+- **Grillas PDF mas grandes:** los tamanos maximos de celda se incrementaron ×1.3 para mejor legibilidad impresa (el grid siempre cabe en la pagina)
 - **Modo online interactivo:** trazado de camino en laberintos, drag-to-select en sopa de letras, numpad en sudoku
 
 ## Scripts disponibles

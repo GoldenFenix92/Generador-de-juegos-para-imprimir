@@ -65,7 +65,7 @@ function calcCell(boardCount: number, gridSize: number): number {
   const rows = Math.ceil(boardCount / cols);
   const availW = (W - (cols - 1) * 20) / cols;
   const availH = (H80 - (rows - 1) * 20) / rows;
-  const px = Math.floor(Math.min(availW / gridSize, availH / gridSize) * 1.3);
+  const px = Math.floor(Math.min(availW / gridSize, availH / gridSize));
   return Math.min(px, boardCount <= 1 ? 104 : 52);
 }
 

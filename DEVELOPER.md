@@ -279,7 +279,7 @@ OnlineGrid maneja eventos touch ademas de mouse:
 - Grilla: start verde, end rojo, solucion azul
 - Footer: dominio
 - `SolutionPDF` exportado para incluir pagina de solucion en el PDF (toggle en PrintPreview)
-- Tamanio de celda calculado como `min(floor(min(W, H80) / wallCols * 1.3), 73)` en ambos casos (×1.3)
+- Tamanio de celda: `min(floor(min(W, H80) / wallCols), 73)` — cap ×1.3 (56→73), raw px sin escalar para no desbordar
 
 ### Grid responsive (useResponsiveCell)
 
@@ -319,7 +319,7 @@ Los datos generados persisten en memoria al navegar entre paginas (Generator →
 - Componentes: `<Document>`, `<Page>`, `<View>`, `<Text>`, `<StyleSheet>`
 - Tamano de pagina: LETTER (612 x 792 pt)
 - Fuente: Helvetica (built-in, sin registro externo para evitar fallos de red)
-- **Escalado de grillas:** todas las `calcCell()` aplican un factor ×1.3 al raw px y los caps se incrementan proporcionalmente (ej. 56→73, 80→104, 52→68) para mejor legibilidad impresa
+- **Escalado de grillas:** los caps de `calcCell()` se incrementaron ×1.3 (ej. 56→73, 80→104, 52→68) — el raw px mantiene `Math.floor(Math.min(W/g, H80/g))` para que el grid siempre quepa en la pagina. El factor ×1.3 solo aplica al cap, no al px calculado, evitando desbordamiento que rompe el PDF.
 
 ### Flujo de descarga
 1. Se construye el arbol JSX del documento (`GamePDFDocument > <Game>PDF`)
@@ -345,7 +345,7 @@ Los datos generados persisten en memoria al navegar entre paginas (Generator →
 - **Grilla:** Start en verde, end en rojo, celdas de pared en negro, abiertas en blanco, solucion en azul
 - **Footer:** Dominio
 - **Solucion:** `SolutionPDF` exportado para pagina extra con el camino resuelto
-- **Tamanio de celda:** `min(floor(min(W, H80) / wallCols * 1.3), 73)` — escala ×1.3 para mejor legibilidad, cap 73px
+- **Tamanio de celda:** `min(floor(min(W, H80) / wallCols), 73)` — cap ×1.3 (56→73), raw px sin escalar
 
 ### PrintPreview: toggle de solucion
 El checkbox "Incluir solucion en PDF" en PrintPreview se oculta condicionalmente cuando `gameId === "tictactoe"`, ya que Tres en Raya no requiere pagina de solucion. Los demas juegos (WordSearch, Sudoku, Maze) muestran el toggle si exportan un `SolutionPDF`.

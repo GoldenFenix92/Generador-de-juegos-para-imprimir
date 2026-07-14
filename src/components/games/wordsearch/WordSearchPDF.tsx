@@ -16,8 +16,8 @@ function getGridSize(wc: number): number {
 }
 
 function calcCell(g: number): { px: number; fs: number } {
-  const px = Math.floor(Math.min(W / g, H80 / g) * 1.3);
-  const fs = px >= 52 ? 14 : px >= 36 ? 11 : px >= 26 ? 9 : px >= 18 ? 8 : 7;
+  const px = Math.floor(Math.min(W / g, H80 / g));
+  const fs = px >= 40 ? 14 : px >= 28 ? 11 : px >= 20 ? 9 : px >= 14 ? 8 : 7;
   const cell = Math.min(px, 73);
   return { px: cell, fs };
 }

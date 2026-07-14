@@ -98,7 +98,13 @@ export default function PrintPreview() {
 
   async function handleDownload() {
     setPrintError(null);
-    const doc = buildDoc();
+    let doc;
+    try {
+      doc = buildDoc();
+    } catch (e) {
+      setPrintError("Error al construir el PDF: " + (e instanceof Error ? e.message : "error desconocido"));
+      return;
+    }
     if (!doc) return;
     try {
       await downloadPDF(doc, `${gameId}.pdf`);
@@ -109,7 +115,13 @@ export default function PrintPreview() {
 
   async function handlePrint() {
     setPrintError(null);
-    const doc = buildDoc();
+    let doc;
+    try {
+      doc = buildDoc();
+    } catch (e) {
+      setPrintError("Error al construir el PDF: " + (e instanceof Error ? e.message : "error desconocido"));
+      return;
+    }
     if (!doc) return;
     try {
       await printPDF(doc);
