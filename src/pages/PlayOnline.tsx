@@ -7,6 +7,7 @@ import WordSearch from "../components/games/wordsearch/WordSearch";
 import SudokuOnline from "../components/games/sudoku/SudokuOnline";
 import MazeOnline from "../components/games/maze/MazeOnline";
 import TicTacToeOnline from "../components/games/tictactoe/TicTacToeOnline";
+import CrosswordOnline from "../components/games/crossword/CrosswordOnline";
 import { useGeneratorStore } from "../store/generator";
 
 const GAME_LABELS: Record<string, string> = {
@@ -14,6 +15,7 @@ const GAME_LABELS: Record<string, string> = {
   sudoku: "Sudoku",
   maze: "Laberinto",
   tictactoe: "Tres en Raya",
+  crossword: "Crucigrama",
 };
 
 const slideArrow = (
@@ -33,6 +35,7 @@ export default function PlayOnline() {
   const isSudoku = gameId === "sudoku";
   const isMaze = gameId === "maze";
   const isTicTacToe = gameId === "tictactoe";
+  const isCrossword = gameId === "crossword";
 
   const config = storedConfig ?? definition?.defaultConfig;
   const [page, setPage] = useState(0);
@@ -143,6 +146,12 @@ export default function PlayOnline() {
         />
       ) : isTicTacToe ? (
         <TicTacToeOnline
+          data={currentData}
+          config={config}
+          onComplete={handleComplete}
+        />
+      ) : isCrossword ? (
+        <CrosswordOnline
           data={currentData}
           config={config}
           onComplete={handleComplete}

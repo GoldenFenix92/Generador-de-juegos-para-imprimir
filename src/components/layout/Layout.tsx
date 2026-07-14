@@ -58,6 +58,18 @@ const navItems = [
     gradientFrom: "#EC4899",
     gradientTo: "#F472B6",
   },
+  {
+    to: "/generator/crossword",
+    label: "Crucigrama",
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 4v16M10 4v16M14 4v16M18 4v16" />
+      </svg>
+    ),
+    gradientFrom: "#F59E0B",
+    gradientTo: "#FBBF24",
+  },
 ];
 
 function ThemeToggle() {

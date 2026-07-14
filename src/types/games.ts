@@ -14,4 +14,4 @@ export interface GameDefinition<TOutput, TConfig extends GameConfig = GameConfig
   defaultConfig: TConfig;
 }
 
-export type GameId = "wordsearch" | "sudoku" | "maze" | "tictactoe";
+export type GameId = "wordsearch" | "sudoku" | "maze" | "tictactoe" | "crossword";

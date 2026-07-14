@@ -294,8 +294,52 @@ Todas las grillas usan el hook `useResponsiveCell(cols, maxCell, gapPx)`:
 | Sudoku | `useResponsiveCell(size, maxCell, 1)` con `maxCell` segun tamanio (72/64/56) |
 | Maze | `useResponsiveCell(wallCols, maxCell, 1)` con `maxCell` segun dificultad (48/36/28/22) |
 | TicTacToe | Layout fijo sin hook |
+| Crossword | `useResponsiveCell(size, maxCell, 2)` con `maxCell` segun tamanio (48/40/34/28) |
 
 ---
+
+## Crucigrama — Funcionalidades especificas
+
+### Niveles de dificultad
+
+| Nivel | Grid | Palabras | Longitud minima | Algoritmo |
+|-------|------|----------|----------------|-----------|
+| Facil | 7x7 | ~5 | 4 letras | Greedy placement con scoring por interseccion |
+| Medio | 9x9 | ~7 | 4 letras | Greedy placement con scoring por interseccion |
+| Dificil | 11x11 | ~9 | 5 letras | Greedy placement con scoring por interseccion |
+| Experto | 13x13 | ~11 | 5 letras | Greedy placement con scoring por interseccion |
+
+### Generacion (`generate.ts`)
+- `DIFFICULTY_CONFIG` mapea dificultad a `{ gridSize, minWordLen, targetWords }`
+- Las palabras se obtienen del `WORD_BANK` global, filtradas por tematica o personalizadas
+- Se utiliza un algoritmo greedy de colocacion:
+  - La primera palabra se coloca horizontalmente en el centro del grid
+  - Cada palabra subsiguiente busca intersecciones con palabras ya colocadas
+  - `canPlace()` verifica que la palabra quepa sin conflictos (celdas adyacentes vacias)
+  - `findBestPlacement()` puntua cada posicion candidata y elige la mejor
+- Las celdas no utilizadas se marcan como bloques (negras)
+- `CLUE_MAP` contiene ~100 palabras comunes con pistas en espanol
+- Las pistas se generan a partir del mapa de pistas o con texto generico
+
+### Modo online (`CrosswordOnline.tsx`)
+- Seleccion de celda con click, doble click cambia direccion (across/down)
+- Escritura directa con teclado (A-Z), flechas para navegar
+- Backspace borra letra actual o retrocede a la celda anterior
+- Pista activa mostrada arriba del grid segun la celda seleccionada
+- Deteccion de completado cuando todas las letras coinciden
+- Grid responsive con `useResponsiveCell(size, maxCell, 2)`
+- Pistas de palabras en columnas (Horizontales / Verticales)
+
+### PDF (`CrosswordPDF.tsx`)
+- Header: titulo + tamano + dificultad
+- Instrucciones: "Resuelve el crucigrama escribiendo las palabras correctas"
+- Grilla: celdas blancas con borde #ccc, bloques #111827, numeros de pista
+- Pistas debajo del grid en dos columnas (Horizontales / Verticales)
+- `SolutionPDF` exportado con letras visibles en todas las celdas
+- Tamanio de celda: `min(floor(min(W, H70) / g), 56)` — usa H70 para dejar espacio a pistas
+
+### Word bank de pistas
+El `CLUE_MAP` en `generate.ts` contiene ~100 pares palabra→pista (ej. "PERRO: Mejor amigo del hombre"). Para palabras sin pista se usa "Palabra de N letras" como fallback.
 
 ## Estado global (Zustand)
 

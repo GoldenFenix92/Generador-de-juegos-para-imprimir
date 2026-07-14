@@ -3,6 +3,7 @@ import wordSearchGame from "../components/games/wordsearch";
 import sudokuGame from "../components/games/sudoku";
 import mazeGame from "../components/games/maze";
 import tictactoeGame from "../components/games/tictactoe";
+import crosswordGame from "../components/games/crossword";
 
 export interface PDFModule<TOutput, TConfig extends GameConfig> {
   default: React.FC<{ data: TOutput; config: TConfig }>;
@@ -32,6 +33,10 @@ const gameEntries: Record<GameId, GameEntry<any, any>> = {
   tictactoe: {
     definition: tictactoeGame,
     loadPDF: () => import("../components/games/tictactoe/TicTacToePDF"),
+  },
+  crossword: {
+    definition: crosswordGame,
+    loadPDF: () => import("../components/games/crossword/CrosswordPDF"),
   },
 };
 

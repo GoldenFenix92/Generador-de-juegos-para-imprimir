@@ -10,6 +10,7 @@ Aplicacion web para generar, personalizar y descargar juegos educativos en PDF l
 - **Sudoku** — Completa la cuadricula con numeros del 1 al 9.
 - **Laberinto** — Encuentra el camino desde la salida (verde) hasta la meta (rojo). 4 niveles de dificultad, modo online interactivo para trazar el camino, PDF con solucion.
 - **Tres en Raya** — Clasico juego de tablero para dos jugadores (sin solucion en PDF).
+- **Crucigrama** — Completa las palabras cruzadas con la ayuda de las pistas.
 
 ## Como usar
 

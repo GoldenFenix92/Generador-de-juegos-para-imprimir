@@ -15,6 +15,7 @@ const GAME_LABELS: Record<string, string> = {
   sudoku: "Sudoku",
   maze: "Laberinto",
   tictactoe: "Tres en Raya",
+  crossword: "Crucigrama",
 };
 
 const SHEET_LABELS: Record<string, string> = {
@@ -22,6 +23,7 @@ const SHEET_LABELS: Record<string, string> = {
   sudoku: "sudoku",
   maze: "laberinto",
   tictactoe: "tablero",
+  crossword: "crucigrama",
 };
 
 const WORD_COUNT_OPTIONS = [5, 10, 15, 20];
@@ -200,6 +202,7 @@ export default function Generator() {
   const isSudoku = gameId === "sudoku";
   const isMaze = gameId === "maze";
   const isTicTacToe = gameId === "tictactoe";
+  const isCrossword = gameId === "crossword";
   const previewConfig = { ...config, showSolution: true };
 
   if (!definition) {
@@ -483,6 +486,66 @@ export default function Generator() {
         </>
       )}
 
+      {isCrossword && (
+        <>
+          <div className="glass-card mb-4 px-5 py-4">
+            <p className="mb-1 font-medium text-primary">Instrucciones:</p>
+            <ol className="list-inside list-decimal space-y-1 text-muted text-sm">
+              <li>Selecciona la dificultad, el modo de generacion y la cantidad de crucigramas.</li>
+              <li>Haz clic en <strong className="text-primary">"Generar Crucigrama"</strong> para crear el puzzle.</li>
+              <li>
+                Elige <strong className="text-primary">"Ver para imprimir"</strong> para descargar en PDF o imprimir, o selecciona el modo
+                "Jugar online" para resolverlo en pantalla.
+              </li>
+            </ol>
+          </div>
+
+          <details className="glass-card mb-4 px-5 py-3 open:pb-5">
+            <summary className="cursor-pointer text-sm font-medium text-primary select-none">
+              Caracteristicas de cada dificultad
+            </summary>
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b" style={{ borderColor: "var(--card-border)" }}>
+                    <th className="px-2 py-1 font-medium text-muted">Dificultad</th>
+                    <th className="px-2 py-1 font-medium text-muted">Grid</th>
+                    <th className="px-2 py-1 font-medium text-muted">Palabras</th>
+                    <th className="px-2 py-1 font-medium text-muted">Longitud minima</th>
+                  </tr>
+                </thead>
+                <tbody className="text-muted">
+                  <tr className="border-b" style={{ borderColor: "var(--card-border)" }}>
+                    <td className="px-2 py-1 font-medium text-primary">Facil</td>
+                    <td className="px-2 py-1">7x7</td>
+                    <td className="px-2 py-1">~5</td>
+                    <td className="px-2 py-1">4 letras</td>
+                  </tr>
+                  <tr className="border-b" style={{ borderColor: "var(--card-border)" }}>
+                    <td className="px-2 py-1 font-medium text-primary">Medio</td>
+                    <td className="px-2 py-1">9x9</td>
+                    <td className="px-2 py-1">~7</td>
+                    <td className="px-2 py-1">4 letras</td>
+                  </tr>
+                  <tr className="border-b" style={{ borderColor: "var(--card-border)" }}>
+                    <td className="px-2 py-1 font-medium text-primary">Dificil</td>
+                    <td className="px-2 py-1">11x11</td>
+                    <td className="px-2 py-1">~9</td>
+                    <td className="px-2 py-1">5 letras</td>
+                  </tr>
+                  <tr>
+                    <td className="px-2 py-1 font-medium text-primary">Experto</td>
+                    <td className="px-2 py-1">13x13</td>
+                    <td className="px-2 py-1">~11</td>
+                    <td className="px-2 py-1">5 letras</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </>
+      )}
+
       <div className="glass-card mb-6 p-5 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end gap-4">
         <DifficultySelector
           value={config.difficulty}
@@ -501,7 +564,86 @@ export default function Generator() {
           />
         )}
 
-        {!isWordSearch && (
+        {isCrossword && (
+          <>
+            <div>
+              <label className="mb-1 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>Modo de generacion</label>
+              <Select
+                value={config.generationMode ?? "random"}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  patch({ generationMode: v });
+                }}
+              >
+                <option value="random">Aleatorio</option>
+                <option value="themed">Tematico</option>
+                <option value="custom">Personalizado</option>
+              </Select>
+            </div>
+
+            {config.generationMode === "themed" && (
+              <div>
+                <label className="mb-1 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>Tematica</label>
+                <Select
+                  value={config.theme ?? "general"}
+                  onChange={(e) => patch({ theme: e.target.value })}
+                >
+                  <option value="general">General</option>
+                  <option value="naturaleza">Naturaleza</option>
+                  <option value="animales">Animales</option>
+                  <option value="comida">Comida</option>
+                  <option value="deportes">Deportes</option>
+                  <option value="profesiones">Profesiones</option>
+                  <option value="musica">Musica</option>
+                  <option value="viajes">Viajes</option>
+                </Select>
+              </div>
+            )}
+
+            {config.generationMode === "custom" && (
+              <div>
+                <label className="mb-1 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                  Palabras personalizadas (separadas por comas)
+                </label>
+                <textarea
+                  value={(config.customWords ?? []).join(", ")}
+                  onChange={(e) => {
+                    const words = e.target.value.split(/[,;\n]+/).map((w: string) => w.trim()).filter((w: string) => w.length > 0);
+                    patch({ customWords: words });
+                  }}
+                  rows={3}
+                  className="glass-select w-full"
+                  style={{ resize: "vertical" } as React.CSSProperties}
+                  placeholder="ej: PERRO, GATO, CASA, SOL, LUNA"
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="mb-1 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>Cantidad de crucigramas</label>
+              <Select
+                value={String(config.sheetCount ?? 1)}
+                onChange={(e) => patch({ sheetCount: Number(e.target.value) })}
+              >
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={n}>{n} crucigrama{n > 1 ? "s" : ""}</option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>Modo</label>
+              <Select
+                value={config.mode ?? "print"}
+                onChange={(e) => patch({ mode: e.target.value })}
+              >
+                <option value="print">Para imprimir</option>
+                <option value="online">Jugar online</option>
+              </Select>
+            </div>
+          </>
+        )}
+
+        {!isWordSearch && !isCrossword && (
           <>
             <div>
               <label className="mb-1 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>Cantidad de {sheetLabel}s</label>
