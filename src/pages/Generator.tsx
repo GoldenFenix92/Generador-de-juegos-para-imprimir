@@ -620,6 +620,19 @@ export default function Generator() {
             )}
 
             <div>
+              <label className="mb-1 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>Cantidad de palabras</label>
+              <Select
+                value={String(config.wordCount ?? 7)}
+                onChange={(e) => patch({ wordCount: Number(e.target.value) as 5 | 7 | 9 | 11 })}
+              >
+                <option value="5">5 palabras (Facil)</option>
+                <option value="7">7 palabras (Medio)</option>
+                <option value="9">9 palabras (Dificil)</option>
+                <option value="11">11 palabras (Experto)</option>
+              </Select>
+            </div>
+
+            <div>
               <label className="mb-1 block text-sm font-medium" style={{ color: "var(--text-primary)" }}>Cantidad de crucigramas</label>
               <Select
                 value={String(config.sheetCount ?? 1)}

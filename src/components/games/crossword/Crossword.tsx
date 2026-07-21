@@ -8,10 +8,10 @@ interface CrosswordProps {
 }
 
 function getMaxCell(size: number): number {
-  if (size <= 7) return 48;
-  if (size <= 9) return 40;
-  if (size <= 11) return 34;
-  return 28;
+  if (size <= 7) return 56;
+  if (size <= 9) return 48;
+  if (size <= 11) return 40;
+  return 34;
 }
 
 export default function Crossword({ data }: CrosswordProps) {

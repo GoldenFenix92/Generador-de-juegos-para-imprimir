@@ -5,6 +5,7 @@ const GAMES = [
   { id: "sudoku", name: "Sudoku", description: "Completa la cuadricula con numeros del 1 al 9." },
   { id: "maze", name: "Laberinto", description: "Encuentra el camino desde la entrada hasta la salida." },
   { id: "tictactoe", name: "Tres en Raya", description: "Clasico juego de tablero para dos jugadores." },
+  { id: "crossword", name: "Crucigrama", description: "Completa las palabras que se cruzan entre si usando las pistas." },
 ] as const;
 
 export default function Home() {

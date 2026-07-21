@@ -1,120 +1,16 @@
 import type { CrosswordConfig, CrosswordOutput, CrosswordPlacedWord, CrosswordClue } from "./types";
-import { WORD_BANK } from "../../../data/wordbank";
+import { CROSSWORD_BANK } from "./crosswordBank";
+
+const MAX_WORD_LENGTH = 15;
 
 const DIFFICULTY_CONFIG = {
-  easy: { gridSize: 7, minWordLen: 4, targetWords: 5 },
-  medium: { gridSize: 9, minWordLen: 4, targetWords: 7 },
-  hard: { gridSize: 11, minWordLen: 5, targetWords: 9 },
-  expert: { gridSize: 13, minWordLen: 5, targetWords: 11 },
+  easy: { gridSize: 9, minWordLen: 4, targetWords: 5 },
+  medium: { gridSize: 11, minWordLen: 5, targetWords: 7 },
+  hard: { gridSize: 13, minWordLen: 6, targetWords: 9 },
+  expert: { gridSize: 15, minWordLen: 7, targetWords: 11 },
 } as const;
 
-const CLUE_MAP: Record<string, string> = {
-  AGUA: "Liquido vital",
-  SOL: "Estrella del sistema solar",
-  LUNA: "Satelite natural",
-  MAR: "Gran masa de agua salada",
-  TIERRA: "Planeta donde vivimos",
-  FUEGO: "Produce calor y luz",
-  AIRE: "Lo respiramos",
-  ARBOL: "Tiene hojas y raices",
-  FLOR: "Parte colorida de una planta",
-  PERRO: "Mejor amigo del hombre",
-  GATO: "Animal que caza ratones",
-  PEZ: "Vive en el agua",
-  PAJARO: "Tiene alas y vuela",
-  CABALLO: "Animal que se monta",
-  VACA: "Da leche",
-  OVEJA: "Da lana",
-  CERDO: "Animal de granja",
-  RATON: "Animal pequeno que roe",
-  LOBO: "Aulla a la luna",
-  OSO: "Animal grande y peludo",
-  LEON: "Rey de la selva",
-  TIGRE: "Felino rayado",
-  ELEFANTE: "Animal con trompa",
-  JIRAFA: "Animal de cuello largo",
-  MANZANA: "Fruta roja o verde",
-  BANANA: "Fruta amarilla y alargada",
-  PAN: "Alimento hecho con harina",
-  LECHE: "Bebida blanca nutritiva",
-  QUESO: "Alimento hecho de leche",
-  ARROZ: "Cereal blanco muy usado",
-  PASTA: "Comida italiana",
-  SOPA: "Comida liquida caliente",
-  ENSALADA: "Mezcla de verduras",
-  CARNE: "Alimento de origen animal",
-  POLLO: "Ave que se come",
-  PESCADO: "Carne del mar",
-  BEBIDA: "Bebida sin color",
-  CAFE: "Bebida caliente y amarga",
-  TE: "Infusion de hojas",
-  JUGO: "Bebida de frutas",
-  CERVEZA: "Bebida alcoholica de cebada",
-  VINO: "Bebida de uvas fermentadas",
-  FUTBOL: "Deporte con pelota y arcos",
-  BASQUET: "Deporte de canasta",
-  TENIS: "Deporte con raqueta",
-  NATACION: "Deporte en el agua",
-  CICLISMO: "Deporte con bicicleta",
-  CORRER: "Actividad de mover las piernas rapido",
-  SALTAR: "Impulsarse del suelo",
-  NADAR: "Moverse en el agua",
-  DOCTOR: "Cuida la salud de las personas",
-  BOMBERO: "Apaga incendios",
-  POLICIA: "Protege a la ciudadania",
-  MAESTRO: "Ensenia en la escuela",
-  ABOGADO: "Defiende en los juicios",
-  INGENIERO: "Disena y construye",
-  MUSICA: "Arte de los sonidos",
-  GUITARRA: "Instrumento de cuerdas",
-  PIANO: "Instrumento de teclas",
-  VIOLIN: "Instrumento de arco",
-  BATERIA: "Instrumento de percusion",
-  FLAUTA: "Instrumento de viento",
-  CANCION: "Composicion musical con letra",
-  VIAJE: "Recorrido a otro lugar",
-  MAPA: "Representacion de un lugar",
-  AVION: "Medio de transporte aereo",
-  TREN: "Medio de transporte sobre rieles",
-  BARCO: "Transporte por agua",
-  HOTEL: "Lugar donde alojarse",
-  PLAYA: "Lugar con arena y mar",
-  MONTANA: "Elevacion natural del terreno",
-  CIUDAD: "Lugar con muchos habitantes",
-  CASA: "Vivienda de las personas",
-  COCINA: "Lugar donde se prepara comida",
-  SALA: "Habitacion principal de la casa",
-  DORMITORIO: "Habitacion para dormir",
-  BANO: "Habitacion con inodoro y ducha",
-  VENTANA: "Abertura en la pared",
-  PUERTA: "Entrada a un lugar",
-  MESA: "Mueble con superficie plana",
-  SILLA: "Mueble para sentarse",
-  CAMISA: "Prenda de vestir con botones",
-  PANTALON: "Prenda que cubre las piernas",
-  VESTIDO: "Prenda femenina de una pieza",
-  ZAPATO: "Calzado para el pie",
-  SOMBRERO: "Prenda para la cabeza",
-  BUFANDA: "Prenda para el cuello",
-  GAFAS: "Se usan para ver mejor",
-  RELOJ: "Sirve para ver la hora",
-  LIBRO: "Conjunto de hojas escritas",
-  LAPIZ: "Se usa para escribir",
-  HOJA: "Parte verde de una planta o papel",
-  ROJO: "Color como la sangre",
-  AZUL: "Color del cielo",
-  VERDE: "Color de la naturaleza",
-  AMARILLO: "Color del sol",
-  NEGRO: "Color oscuro",
-  BLANCO: "Color claro",
-  GRIS: "Color entre blanco y negro",
-  AMOR: "Sentimiento profundo",
-  PAZ: "Estado de tranquilidad",
-  ALEGRIA: "Sentimiento de felicidad",
-  BONDAD: "Cualidad de ser bueno",
-  HONESTIDAD: "Cualidad de decir la verdad",
-  RESPETO: "Consideracion hacia otros",
-};
+
 
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -128,28 +24,34 @@ function shuffleArray<T>(arr: T[]): T[] {
 function getWordsForCrossword(config: CrosswordConfig): { word: string; clue: string }[] {
   const diff = DIFFICULTY_CONFIG[config.difficulty] ?? DIFFICULTY_CONFIG.medium;
   const minLen = diff.minWordLen;
-  const target = diff.targetWords;
+  const target = config.wordCount ?? diff.targetWords;
+  const maxLen = Math.min(gridSizeForDifficulty(config.difficulty) - 2, MAX_WORD_LENGTH);
 
-  let candidates: string[] = [];
-
-  if (config.generationMode === "themed" && config.theme) {
-    candidates = WORD_BANK[config.theme] ?? WORD_BANK.general;
-  } else if (config.generationMode === "custom" && config.customWords?.length) {
-    candidates = config.customWords;
-  } else {
-    candidates = Object.values(WORD_BANK).flat();
+  if (config.generationMode === "custom" && config.customWords?.length) {
+    const entries = config.customWords.map((w) => ({ word: w.toUpperCase(), clue: "" }));
+    return shuffleArray(entries).slice(0, target).sort((a, b) => b.word.length - a.word.length);
   }
 
-  const filtered = candidates.filter((w) => w.length >= minLen && w.length <= gridSizeForDifficulty(config.difficulty) - 2);
-  const unique = [...new Set(filtered.map((w) => w.toUpperCase()))];
-  const shuffled = shuffleArray(unique);
+  let pool: { word: string; clue: string }[] = [];
 
+  if (config.generationMode === "themed" && config.theme && CROSSWORD_BANK[config.theme]) {
+    pool = CROSSWORD_BANK[config.theme];
+  } else {
+    pool = Object.values(CROSSWORD_BANK).flat();
+  }
+
+  const filtered = pool.filter(
+    (e) => e.word.length >= minLen && e.word.length <= maxLen,
+  );
+
+  const bufferTarget = config.generationMode === "custom" ? target : target + 6;
+  const seen = new Set<string>();
   const result: { word: string; clue: string }[] = [];
-  for (const w of shuffled) {
-    if (result.length >= target) break;
-    if (result.some((r) => r.word === w)) continue;
-    const clue = CLUE_MAP[w] ?? `Palabra de ${w.length} letras`;
-    result.push({ word: w, clue });
+  for (const entry of shuffleArray(filtered)) {
+    if (result.length >= bufferTarget) break;
+    if (seen.has(entry.word)) continue;
+    seen.add(entry.word);
+    result.push(entry);
   }
 
   return result.sort((a, b) => b.word.length - a.word.length);
@@ -237,6 +139,7 @@ function findBestPlacement(
   word: string,
   placedWords: CrosswordPlacedWord[],
   size: number,
+  allowIsolated: boolean,
 ): { row: number; col: number; direction: "across" | "down"; score: number } | null {
   let best: { row: number; col: number; direction: "across" | "down"; score: number } | null = null;
 
@@ -269,13 +172,19 @@ function findBestPlacement(
     }
   }
 
-  if (!best && gridSizeForDifficulty("easy") >= word.length) {
+  if (!best && allowIsolated) {
     const center = Math.floor(size / 2);
-    const startCol = Math.floor((size - word.length) / 2);
-
-    if (placedWords.length === 0) {
-      if (canPlace(grid, word, center, startCol, "across")) {
-        return { row: center, col: startCol, direction: "across", score: 999 };
+    const offsets = [0, -1, 1, -2, 2];
+    for (const dr of offsets) {
+      const row = center + dr;
+      if (row < 0 || row + word.length > size) continue;
+      for (const dir of (["across", "down"] as const)) {
+        const col = dir === "across"
+          ? Math.max(0, Math.floor((size - word.length) / 2))
+          : Math.floor(size / 2);
+        if (canPlace(grid, word, row, col, dir)) {
+          return { row, col, direction: dir, score: 50 - Math.abs(dr) * 5 };
+        }
       }
     }
   }
@@ -314,7 +223,7 @@ function generateClues(
   const seen = new Set<string>();
 
   for (const pw of placedWords) {
-    const key = `${pw.row},${pw.col}`;
+    const key = `${pw.row},${pw.col},${pw.direction}`;
     if (seen.has(key)) continue;
     seen.add(key);
 
@@ -351,46 +260,81 @@ function createBlocks(grid: string[][]): boolean[][] {
   return blocks;
 }
 
-export function generateCrossword(config: CrosswordConfig): CrosswordOutput {
-  const diff = DIFFICULTY_CONFIG[config.difficulty] ?? DIFFICULTY_CONFIG.medium;
-  const size = diff.gridSize;
+function tryPlaceWords(
+  size: number,
+  wordEntries: { word: string; clue: string }[],
+  clueMap: Map<string, string>,
+  allowIsolated: boolean,
+  target: number,
+): CrosswordOutput {
   const grid = createEmptyGrid(size);
-  const wordEntries = getWordsForCrossword(config);
-  const clueMap = new Map(wordEntries.map((e) => [e.word, e.clue]));
-
   const placedWords: CrosswordPlacedWord[] = [];
+  const pending = wordEntries.map((e, i) => ({ ...e, idx: i }));
+  const used = new Set<number>();
 
-  for (let i = 0; i < wordEntries.length; i++) {
-    const { word } = wordEntries[i];
-
-    if (i === 0) {
-      const center = Math.floor(size / 2);
-      const startCol = Math.max(0, Math.floor((size - word.length) / 2));
-      if (canPlace(grid, word, center, startCol, "across")) {
-        placeWord(grid, word, center, startCol, "across");
-        placedWords.push({ word, row: center, col: startCol, direction: "across" });
-      }
-      continue;
-    }
-
-    const best = findBestPlacement(grid, word, placedWords, size);
-    if (best) {
-      placeWord(grid, word, best.row, best.col, best.direction);
-      placedWords.push({ word, row: best.row, col: best.col, direction: best.direction });
+  const first = pending[0];
+  if (first) {
+    const center = Math.floor(size / 2);
+    const startCol = Math.max(0, Math.floor((size - first.word.length) / 2));
+    if (canPlace(grid, first.word, center, startCol, "across")) {
+      placeWord(grid, first.word, center, startCol, "across");
+      placedWords.push({ word: first.word, row: center, col: startCol, direction: "across" });
+      used.add(first.idx);
     }
   }
 
-  const blocks = createBlocks(grid);
-  const numbers = numberCells(grid, placedWords);
-  const clues = generateClues(placedWords, clueMap);
+  let changed = true;
+  let pass = 0;
+  while (changed && pass < 5) {
+    if (placedWords.length >= target) break;
+    changed = false;
+    pass++;
+    for (const entry of pending) {
+      if (placedWords.length >= target) break;
+      if (used.has(entry.idx)) continue;
+      const best = findBestPlacement(grid, entry.word, placedWords, size, allowIsolated && pass >= 3);
+      if (best) {
+        placeWord(grid, entry.word, best.row, best.col, best.direction);
+        placedWords.push({ word: entry.word, row: best.row, col: best.col, direction: best.direction });
+        used.add(entry.idx);
+        changed = true;
+      }
+    }
+  }
 
   return {
     grid,
-    blocks,
+    blocks: createBlocks(grid),
     width: size,
     height: size,
     placedWords,
-    numbers,
-    clues,
+    numbers: numberCells(grid, placedWords),
+    clues: generateClues(placedWords, clueMap),
   };
+}
+
+export function generateCrossword(config: CrosswordConfig): CrosswordOutput {
+  const diff = DIFFICULTY_CONFIG[config.difficulty] ?? DIFFICULTY_CONFIG.medium;
+  const size = diff.gridSize;
+  const wordEntries = getWordsForCrossword(config);
+  const clueMap = new Map(wordEntries.map((e) => [e.word, e.clue]));
+
+  const target = config.wordCount ?? diff.targetWords;
+
+  const tries = [
+    wordEntries,
+    ...Array.from({ length: 5 }, () => shuffleArray(wordEntries)),
+  ];
+
+  let best = tryPlaceWords(size, tries[0], clueMap, false, target);
+
+  for (let i = 1; i < tries.length; i++) {
+    const result = tryPlaceWords(size, tries[i], clueMap, i >= 3, target);
+    if (result.placedWords.length > best.placedWords.length) {
+      best = result;
+    }
+    if (best.placedWords.length >= target) break;
+  }
+
+  return best;
 }
